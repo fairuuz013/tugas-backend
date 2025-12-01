@@ -1,0 +1,1 @@
+export const hello = "https://unesco.or.id/wp-content/uploads/2025/10/Bahlil-Lahadalia.jpg"
