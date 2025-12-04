@@ -54,15 +54,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     next();
 });
 
-
-interface Songs {
-    id: number,
-    nama: string,
-    singer: string,
-    release: number
-}
-
-
 interface ApiResponse {
     success: boolean;
     message: string;
@@ -160,144 +151,10 @@ const getProductByIdValidation = [
 
 
 // TUGAS DAY 4
-let songs: Songs[]  =  [
-    { id: 1, nama: "odoriko", singer: "vaundy", release: 2023 },
-    { id: 2, nama: "supernatural", singer: "newjeans", release: 2024 },
-    { id: 3, nama: "birds of a feather", singer: "billieeilish", release: 2024 }
-]
 
 
 // route 1 tugas day 4
 
-app.get('/', (_req: Request, res: Response) => {
-    successResponse(
-        res,
-        "Welcome to songs api man",
-        {
-            hari: 4,
-            status: "Server Hidup"
-
-        }
-    )
-})
-
-
-
-// route 2
-app.get('/api/songs', (_req: Request, res: Response) => {
-    successResponse(
-        res,
-        "Found song",
-        songs
-    )
-})
-
-
-// route 3
-app.get('/api/songs/:id', validate(getProductByIdValidation), (req: Request, res: Response) => {
-    if(!req.params.id) {
-    throw new Error, "Parameter nya ngga ada wok"
-    }
-
-    const id = parseInt  (req.params.id)
-    const song = songs.find(s => s.id === id);
-
-    if (!song) {
-        throw new Error ("Lagu tidak di temukan")
-    }
-
-    successResponse(
-        res, "Mantap lagu nya ketemu",
-        song
-    )
-})
-
-
-// tugas 4
-app.get('/api/search', (req: Request, res: Response) => {
-    const { name, sig } = req.query
-
-    let result = songs;
-
-    if (name) {
-        result = result.filter(s =>
-            s.nama.toLowerCase().includes((name as string).toLowerCase())
-        )
-    }
-    if (sig) {
-        result = result.filter(s =>
-            s.singer.toLowerCase().trim() === String(sig).toLowerCase().trim()
-        );
-
-    }
-
-    res.json({
-        success: true,
-        filtered_result: result
-    });
-})
-
-// tugas 5
-app.post('/api/songs', validate(createProductValidation), (req: Request, res: Response) => {
-    const { nama, singer, release } = req.body;
-
-    const newSong = {
-        id: songs.length + 1,
-        nama,
-        singer,
-        release
-    };
-    songs.push(newSong);
-
-    successResponse(
-        res,
-        "Produk berasil di tambah",
-        songs,
-        null,
-        201
-    )
-});
-
-
-//soal 6
-
-app.put('/api/songs/:id', (req: Request, res: Response) => {
-    const id = parseInt(req.params.id!)
-    const index = songs.findIndex(s => s.id === id);
-
-    if (index === -1) {
-        throw new Error, "Gagal update"
-    }
-
-    songs[index] = { ...songs[index], ...req.body };
-
-
-  successResponse(
-    res, 
-    "update song",
-    songs
-  )
-});
-
-
-
-// tugas nomer 7
-
-app.delete('/api/songs/:id', (req: Request, res: Response) => {
-    const id = parseInt(req.params.id!);
-    const index = songs.findIndex(s => s.id === id);
-
-
-    if (index === -1) {
-        return res.status(404).json({ success: false, message: "lagu tidak ada " });
-    }
-    const deleted = songs.splice(index, 1)
-    res.json({
-        success: true,
-        message: "lagu berhasil dihapus",
-        data: deleted[0]
-    });
-});
 
 
 // BUILD NYA 
