@@ -3,9 +3,11 @@ import morgan from "morgan";
 import helmet from "helmet";
 import cors from "cors"
 import productRouter from './routes/product.route'
+import songRouter from './routes/song.route'
 import { errorHandler } from "./middleware/error.handler";
 import { successResponse } from "./utils/response";
 import { apiKey, logging } from "./middleware/product.validasion";
+import { apiKeySong, loggingSong } from "./middleware/song.validasion";
 
 
 const app: Application = express()
@@ -16,6 +18,7 @@ app.use(helmet())
 app.use(cors())
 app.use(morgan('dev'))
 app.use(express.json())
+ 
 
 // 1
 app.use (logging)
@@ -25,8 +28,6 @@ app.use(apiKey)
 
 
 
-app.use('/api/products', productRouter)
-
 
 app.get('/', (_req: Request, res: Response) => {
     successResponse(
@@ -35,10 +36,11 @@ app.get('/', (_req: Request, res: Response) => {
         {
             hari: 4,
             status: "Server Hidup"
-
         }
     )
 })
+app.use ('/api/songs', songRouter)
+app.use('/api/products', productRouter)
 
 // 9
 app.get(/.*/, (req: Request, _res: Response) => {
@@ -46,5 +48,20 @@ app.get(/.*/, (req: Request, _res: Response) => {
 })
 
 app.use(errorHandler)
+
+
+
+
+// untuk tempat song
+
+
+// app.get(/.*/, (req: Request, _res: Response) => {
+//     throw new Error(`Route ${req.originalUrl} tidak ada api songs `)
+// })
+
+// app.use(apiKeySong)
+
+// app.use(loggingSong)
+
 
 export default app

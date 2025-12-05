@@ -13,16 +13,17 @@ export const getSongById = (id: string) => {
     if (!song) {
         throw new Error("Not found song")
     }
+    return song
 
 }
 
-export const searchSong = (nama?: string,
+export const searchSong = (name?: string,
     sig?: string) => {
     let result = songs;
 
-    if (nama) {
+    if (name) {
         result = result.filter(s =>
-            s.nama.toLowerCase().includes((nama as string).toLowerCase())
+            s.nama.toLowerCase().includes((name as string).toLowerCase())
         )
     }
     if (sig) {
@@ -36,16 +37,42 @@ export const searchSong = (nama?: string,
 
 
 export const createSong = (nama: string,
-    singer: string, release: number ) => {
+    singer: string, release: number) => {
 
-        const newSong: Songs = {
-            id: songs.length + 1,
-            nama,
-            singer,
-            release
-        };
-        songs.push(newSong);
+    const newSong: Songs = {
+        id: songs.length + 1,
+        nama,
+        singer,
+        release
+    };
+    songs.push(newSong);
 
-       return songs 
+    return songs
+}
+
+
+export const updateSong = (id: string, data: any) => {
+    const numId = parseInt(id)
+    const index = songs.findIndex(s => s.id === numId)
+
+    if (index === -1) {
+        throw new Error("lagu tidak di temukan")
     }
+    songs[index] = { ...songs[index], ...data }
+    return songs[index]
+}
 
+
+
+export const deleteSong = (id: string) => {
+    const numId = parseInt(id);
+    const index = songs.findIndex(s => s.id === numId);
+
+
+    if (index === -1) {
+        throw new Error, "Musik success delete"
+    }
+    const deleted = songs.splice(index, 1)
+
+    return deleted
+}

@@ -13,7 +13,6 @@ export const getAll = (_req: Request, res: Response) => {
         res,
         "anjay berasil",
         {
-
             jumlah: total,
             data: products
         }
@@ -32,6 +31,7 @@ export const getById = (req: Request, res: Response) => {
 
     successResponse(
         res, "Product berhasil di ambil product",
+        
         product
     )
 }

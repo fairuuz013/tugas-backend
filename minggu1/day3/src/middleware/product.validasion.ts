@@ -45,7 +45,6 @@ export const getProductByIdValidation = [
 ];
 
 
-
 export const apiKey =(req: Request, res: Response, next: NextFunction) => {
     const apiKey = req.headers['x-api-key'];
     if (!apiKey) {

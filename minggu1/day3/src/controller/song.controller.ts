@@ -1,5 +1,5 @@
 import type { Request, Response } from "express"
-import { createSong, getAllSongs, getSongById, searchSong } from "../services/song.services"
+import { createSong, deleteSong, getAllSongs, getSongById, searchSong, updateSong } from "../services/song.services"
 import { errorResponse, successResponse } from "../utils/response"
 
 
@@ -36,9 +36,9 @@ export const getById = (req: Request, res: Response) => {
 
 // route 3 
 export const search =  (req: Request, res: Response) => {
-    const { name, sig } = req.query
+    const { nama, sig } = req.query
 
-    const result = searchSong(name?.toString(),
+    const result = searchSong(nama?.toString(),
     sig?.toString())
 
     successResponse(
@@ -46,7 +46,6 @@ export const search =  (req: Request, res: Response) => {
         'Songs found',
         result
     )
-
 
 }
 
@@ -70,7 +69,31 @@ export const create = (req: Request, res: Response) => {
 }
 
 
-// 
+//  route  5
+export const update = (req: Request, res: Response) => {
+   
+    const song = updateSong(req.params.id!, req.body,)
+    
+    
+  successResponse(
+    res, 
+    "update song",
+    song
+  )
+}
+
+
+// route 6
+export const remove = (req: Request, res: Response) => {
+    
+    const deleted = deleteSong(req.params.id!)
+    
+    successResponse(
+        res,
+        "songs delete",
+        deleted
+    )
+}
 
 
 

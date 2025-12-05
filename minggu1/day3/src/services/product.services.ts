@@ -15,6 +15,7 @@ export const getProductById = (id: string) => {
     if (!product) {
         throw new Error("Product tidak di temukan")
     }
+    return product
 }
 
 // ROUTE 3
