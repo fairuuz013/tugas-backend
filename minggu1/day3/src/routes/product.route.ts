@@ -12,11 +12,12 @@ const router = Router()
 // route 2 
 router.get('/', getAll)
 
-// route 3
+// route ke 3 
+router.get('/search',search );
+
+// route 4
 router.get('/:id', validate(getProductByIdValidation), getById );
 
-// route ke 4
-router.get('/search',search );
 
 
 // route ke 5 men 

@@ -4,18 +4,15 @@ import { createSongValidation, getSongByIdValidation, validate } from  "../middl
 
 const router = Router()
 
-router.get('/', getAll)
-
 // router 2
-
+router.get('/', getAll)
 
 
 // router 3
+router.get('/search', search)
 
 
 // tugas 4
-router.get('/search', search)
-
 router.get('/:id', validate(getSongByIdValidation), getById)
 
 // tugas 5

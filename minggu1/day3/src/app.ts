@@ -7,7 +7,7 @@ import songRouter from './routes/song.route'
 import { errorHandler } from "./middleware/error.handler";
 import { successResponse } from "./utils/response";
 import { apiKey, logging } from "./middleware/product.validasion";
-import { apiKeySong, loggingSong } from "./middleware/song.validasion";
+
 
 
 const app: Application = express()
@@ -51,17 +51,6 @@ app.use(errorHandler)
 
 
 
-
-// untuk tempat song
-
-
-// app.get(/.*/, (req: Request, _res: Response) => {
-//     throw new Error(`Route ${req.originalUrl} tidak ada api songs `)
-// })
-
-// app.use(apiKeySong)
-
-// app.use(loggingSong)
 
 
 export default app
