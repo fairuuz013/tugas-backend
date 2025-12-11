@@ -23,6 +23,10 @@ export const createProductValidation = [
         .isNumeric().withMessage('Stock harus angka')
         .custom(value => value > 0).withMessage('Stock harus lebih dari 0'),
 
+    body('categoryId')
+        .isNumeric().withMessage('Stock harus angka')
+        .custom(value => value > 0).withMessage('Stock harus lebih dari 1'),
+
     ];
 
 // Validasi untuk GET by ID produk

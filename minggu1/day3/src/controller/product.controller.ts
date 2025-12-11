@@ -51,12 +51,13 @@ export const search = async (req: Request, res: Response) => {
 
 //4
 export const create = async (req: Request, res: Response) => {
-    const { name, description, price, stock } = req.body
+    const { name, description, price, stock, categoryId } = req.body
     const data = {
         name: String(name),
         description: String(description), 
         price: Number(price),
         stock: Number(stock),
+        categoris: Number(categoryId),
         ...(description && { description: description})
     }
 

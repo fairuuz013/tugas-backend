@@ -9,7 +9,7 @@ const prisma = getPrisma()
 // ROUTE PRODUCT 
 // ROUTE 1
 export const getAllProducts = async (): Promise<{ products: Product[],  total: number}> => {
-const products = await prisma.product.findMany()
+const products = await prisma.product.findMany({include: { category: true }})
 
 const total = products.length
 
@@ -24,7 +24,8 @@ export const getProductById = async (id: string) => {
     const numId = parseInt(id)
 
     const product = await prisma.product.findUnique({
-        where: { id:numId }
+        where: { id:numId },
+        include: {category: true},
     })
 
     if (!product) {
@@ -51,12 +52,13 @@ export const searchProduct = async (name?: string,min_price?: number, max_price?
                ...(min_price && { gte: min_price }),
                ...(max_price && { lte: max_price }),
             }
-        }
+        },
+        include: {category: true}
     })
 }
 
 // ROUTE 4
-export const createProduct = async (data: {name: string, description?: string, price: number, stock: number }):Promise<Product> => {
+export const createProduct = async (data: {name: string, description?: string, price: number, stock: number, categoryId?: number }):Promise<Product> => {
  return await prisma.product.create
  
  ({
@@ -65,6 +67,7 @@ export const createProduct = async (data: {name: string, description?: string, p
         description: data.description ?? null,
         price: data.price,
         stock: data.stock,
+        categoryId: data.categoryId ?? null,
     }
  })
 
