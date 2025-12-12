@@ -1,0 +1,9 @@
+model Order {
+  id        Int      @id @default(autoincrement())
+  userId    Int // cuma angka, ngga ada relasi
+  total     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+
+  items     OrderItem[]
+  deletedAt DateTime?
+}

@@ -4,6 +4,8 @@ import helmet from "helmet";
 import cors from "cors"
 import productRouter from './routes/product.route'
 import categoryRouter from './routes/category.route'
+import orderRouter from './routes/order.route'
+import orderItemRouter from './routes/orderItem.route'
 import { errorHandler } from "./middleware/error.handler";
 import { successResponse } from "./utils/response";
 import { apiKey, logging } from "./middleware/product.validasion";
@@ -39,6 +41,8 @@ app.get('/', (_req: Request, res: Response) => {
         }
     )
 })
+app.use('/api/ordersItem',orderItemRouter )
+app.use('/api/orders',orderRouter )
 app.use('/api/category', categoryRouter)
 app.use('/api/products', productRouter)
 

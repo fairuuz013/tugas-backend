@@ -57,7 +57,7 @@ export const create = async (req: Request, res: Response) => {
         description: String(description), 
         price: Number(price),
         stock: Number(stock),
-        categoris: Number(categoryId),
+        categoryId: Number(categoryId),
         ...(description && { description: description})
     }
 
