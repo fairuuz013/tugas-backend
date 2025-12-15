@@ -7,7 +7,8 @@ import {
     searchOrder,
     createOrder,
     updateOrder,
-    deleteOrder
+    deleteOrder,
+    checkoutOrder
 } from "../services/order.services";
 
 
@@ -90,3 +91,31 @@ export const remove = async (req: Request, res: Response) => {
         return errorResponse(res, err.message);
     }
 };
+
+
+
+
+
+export interface OrderRequest extends Request {
+    userId: number
+    total: number
+    orderItems: OrderItems[]
+}
+
+export interface OrderItems {
+    orderId: number
+    productId: number
+    quantity: number
+}
+
+
+export const checkout = async (req: Request, res: Response) => {
+    const result = await checkoutOrder(req.body)
+    successResponse(
+        res,
+        "Order berasil dibuat",
+        result,
+        null,
+        201
+    )
+}

@@ -1,11 +1,11 @@
-import type { OrderItem } from "../generated/client";
+import type { OrderItems } from "../generated/client";
 import { getPrisma } from "../prisma";
 
 const prisma = getPrisma()
 
 // 1. GET ALL
-export const getAllOrderItems = async (): Promise<OrderItem[]> => {
-    return await prisma.orderItem.findMany({
+export const getAllOrderItems = async (): Promise<OrderItems[]> => {
+    return await prisma.orderItems.findMany({
         where: { deletedAt: null },
         include: { product: true, order: true }
     });
@@ -13,8 +13,8 @@ export const getAllOrderItems = async (): Promise<OrderItem[]> => {
 
 
 // 2. GET BY ID
-export const getOrderItemById = async (id: number): Promise<OrderItem> => {
-    const item = await prisma.orderItem.findUnique({
+export const getOrderItemById = async (id: number): Promise<OrderItems> => {
+    const item = await prisma.orderItems.findUnique({
         where: { id },
         include: { product: true }
     });
@@ -28,8 +28,8 @@ export const getOrderItemById = async (id: number): Promise<OrderItem> => {
 
 
 // 3. SEARCH ORDER ITEM (opsional)
-export const searchOrderItem = async (orderId?: number, productId?: number): Promise<OrderItem[]> => {
-    return await prisma.orderItem.findMany({
+export const searchOrderItem = async (orderId?: number, productId?: number): Promise<OrderItems[]> => {
+    return await prisma.orderItems.findMany({
         where: {
             deletedAt: null,
             ...(orderId && { orderId }),
@@ -45,9 +45,9 @@ export const createOrderItem = async (data: {
     orderId: number;
     productId: number;
     quantity: number;
-}): Promise<OrderItem> => {
+}): Promise<OrderItems> => {
 
-    return await prisma.orderItem.create({
+    return await prisma.orderItems.create({
         data: {
             orderId: data.orderId,
             productId: data.productId,
@@ -60,9 +60,9 @@ export const createOrderItem = async (data: {
 // 5. UPDATE (biasanya update quantity doang)
 export const updateOrderItem = async (
     id: number,
-    data: Partial<OrderItem>
-): Promise<OrderItem> => {
-    return await prisma.orderItem.update({
+    data: Partial<OrderItems>
+): Promise<OrderItems> => {
+    return await prisma.orderItems.update({
         where: { id },
         data
     });
@@ -70,8 +70,8 @@ export const updateOrderItem = async (
 
 
 // 6. SOFT DELETE
-export const deleteOrderItem = async (id: number): Promise<OrderItem> => {
-    return await prisma.orderItem.update({
+export const deleteOrderItem = async (id: number): Promise<OrderItems> => {
+    return await prisma.orderItems.update({
         where: { id },
         data: { deletedAt: new Date() }
     });
