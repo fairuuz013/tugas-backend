@@ -6,9 +6,11 @@ import productRouter from './routes/product.route'
 import categoryRouter from './routes/category.route'
 import orderRouter from './routes/order.route'
 import orderItemRouter from './routes/orderItem.route'
+import authRouter from './routes/auth.route'
 import { errorHandler } from "./middleware/error.handler";
 import { successResponse } from "./utils/response";
-import { apiKey, logging } from "./middleware/product.validasion";
+import { logging } from "./middleware/product.validasion";
+
 
 
 
@@ -26,7 +28,6 @@ app.use(express.json())
 app.use (logging)
 
 // 2
-app.use(apiKey)
 
 
 
@@ -41,6 +42,8 @@ app.get('/', (_req: Request, res: Response) => {
         }
     )
 })
+
+app.use('/api/auth', authRouter)
 app.use('/api/ordersItem',orderItemRouter )
 app.use('/api/orders',orderRouter )
 app.use('/api/category', categoryRouter)

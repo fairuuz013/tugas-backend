@@ -9,7 +9,7 @@ async function main() {
 
   // Clean existing data (optional - hapus jika tidak ingin menghapus data existing)
   await prisma.orderItems.deleteMany();
-  await prisma.order.deleteMany();
+  await prisma.orders.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
   await prisma.user.deleteMany();
@@ -95,7 +95,7 @@ async function main() {
       };
     });
 
-    const order = await prisma.order.create({
+    const order = await prisma.orders.create({
       data: {
         userId: user.id,
         total: total.toFixed(2),

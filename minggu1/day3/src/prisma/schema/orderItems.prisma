@@ -1,15 +1,16 @@
 model OrderItems {
-    id        Int @id @default(autoincrement())
-    orderId   Int
-    productId Int
-    quantity  Int
+  id          Int      @id @default(autoincrement())
+  orderId     Int
+  productId   Int
+  quantity    Int
+  priceAtTime Decimal?   
 
-    order   Order   @relation(fields: [orderId], references: [id])
-    product Product @relation(fields: [productId], references: [id])
+  order   Orders   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
 
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-    @@map("order_items")
+  @@map("order_items")
 }

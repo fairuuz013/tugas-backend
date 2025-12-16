@@ -42,18 +42,27 @@ export const searchOrderItem = async (orderId?: number, productId?: number): Pro
 
 // 4. CREATE
 export const createOrderItem = async (data: {
-    orderId: number;
-    productId: number;
-    quantity: number;
+  orderId: number;
+  productId: number;
+  quantity: number;
 }): Promise<OrderItems> => {
 
-    return await prisma.orderItems.create({
-        data: {
-            orderId: data.orderId,
-            productId: data.productId,
-            quantity: data.quantity
-        }
-    });
+  const product = await prisma.product.findUnique({
+    where: { id: data.productId }
+  });
+
+  if (!product) {
+    throw new Error("Produk tidak ditemukan");
+  }
+
+  return await prisma.orderItems.create({
+    data: {
+      orderId: data.orderId,
+      productId: data.productId,
+      quantity: data.quantity,
+      priceAtTime: product.price 
+    }
+  });
 };
 
 

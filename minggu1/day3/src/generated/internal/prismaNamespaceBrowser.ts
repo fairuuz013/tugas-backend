@@ -52,7 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Category: 'Category',
-  Order: 'Order',
+  Orders: 'Orders',
   OrderItems: 'OrderItems',
   Product: 'Product',
   User: 'User'
@@ -85,7 +85,7 @@ export const CategoryScalarFieldEnum = {
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
 
 
-export const OrderScalarFieldEnum = {
+export const OrdersScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   total: 'total',
@@ -94,7 +94,7 @@ export const OrderScalarFieldEnum = {
   deletedAt: 'deletedAt'
 } as const
 
-export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+export type OrdersScalarFieldEnum = (typeof OrdersScalarFieldEnum)[keyof typeof OrdersScalarFieldEnum]
 
 
 export const OrderItemsScalarFieldEnum = {
@@ -102,6 +102,7 @@ export const OrderItemsScalarFieldEnum = {
   orderId: 'orderId',
   productId: 'productId',
   quantity: 'quantity',
+  priceAtTime: 'priceAtTime',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -127,9 +128,13 @@ export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeo
 
 export const UserScalarFieldEnum = {
   id: 'id',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
   name: 'name',
   email: 'email',
-  password_hash: 'password_hash'
+  password_hash: 'password_hash',
+  role: 'role'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]

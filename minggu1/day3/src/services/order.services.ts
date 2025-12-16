@@ -1,11 +1,11 @@
-import type { Order } from "../generated/client";
+import type { Orders } from "../generated/client";
 import { getPrisma } from "../prisma";
 
 const prisma = getPrisma()
 
 
-export const getAllOrder = async (): Promise<{ orders: Order[], total: number }> => {
-    const orders = await prisma.order.findMany(
+export const getAllOrder = async (): Promise<{ orders: Orders[], total: number }> => {
+    const orders = await prisma.orders.findMany(
         {
             include: { orderItems: true },
             where: {
@@ -24,7 +24,7 @@ export const getAllOrder = async (): Promise<{ orders: Order[], total: number }>
 export const getOrderById = async (id: string) => {
     const numId = parseInt(id);
 
-    const order = await prisma.order.findUnique({
+    const order = await prisma.orders.findUnique({
         where: { id: numId },
         include: {
             user: true,
@@ -51,8 +51,8 @@ export const searchOrder = async (
     userId?: number,
     min_total?: number,
     max_total?: number
-): Promise<Order[]> => {
-    return await prisma.order.findMany({
+): Promise<Orders[]> => {
+    return await prisma.orders.findMany({
         where: {
             deletedAt: null,
 
@@ -78,46 +78,54 @@ export const searchOrder = async (
 
 
 export const createOrder = async (data: {
-    userId: number,
-    items: {
-        productId: number,
-        quantity: number
-    }[]
+  userId: number,
+  items: {
+    productId: number,
+    quantity: number
+  }[]
 }) => {
-    // hitung total
-    const total = await Promise.all(
-        data.items.map(async (item) => {
-            const product = await prisma.product.findUnique({
-                where: { id: item.productId }
-            });
+  const products = await Promise.all(
+    data.items.map(async (item) => {
+      const product = await prisma.product.findUnique({
+        where: { id: item.productId }
+      });
 
-            if (!product) throw new Error("Produk tidak ditemukan");
+      if (!product) throw new Error("Produk tidak ditemukan");
 
-            return Number(product.price) * item.quantity;
-        })
-    ).then(values => values.reduce((a, b) => a + b, 0));
+      return {
+        productId: item.productId,
+        quantity: item.quantity,
+        price: product.price
+      };
+    })
+  );
 
-    return await prisma.order.create({
-        data: {
-            userId: data.userId,
-            total,
-            orderItems: {
-                create: data.items.map((item) => ({
-                    productId: item.productId,
-                    quantity: item.quantity
-                }))
-            }
-        }
-    });
+  const total = products.reduce(
+    (sum, item) => sum + Number(item.price) * item.quantity,
+    0
+  );
+
+  return await prisma.orders.create({
+    data: {
+      userId: data.userId,
+      total,
+      orderItems: {
+        create: products.map(p => ({
+          productId: p.productId,
+          quantity: p.quantity,
+          priceAtTime: p.price 
+        }))
+      }
+    }
+  });
 };
 
 
 
-
-export const updateOrder = async (id: string, data: Partial<Order>): Promise<Order> => {
+export const updateOrder = async (id: string, data: Partial<Orders>): Promise<Orders> => {
     const numId = parseInt(id);
 
-    return await prisma.order.update({
+    return await prisma.orders.update({
         where: {
             id: numId,
             deletedAt: null
@@ -130,10 +138,10 @@ export const updateOrder = async (id: string, data: Partial<Order>): Promise<Ord
 
 
 
-export const deleteOrder = async (id: string): Promise<Order> => {
+export const deleteOrder = async (id: string): Promise<Orders> => {
     const numId = parseInt(id);
 
-    return await prisma.order.update({
+    return await prisma.orders.update({
         where: {
             id: numId,
             deletedAt: null
@@ -159,66 +167,66 @@ export interface OrderItems {
     quantity: number
 }
 
-
 export const checkoutOrder = async (data: CreateOrder) => {
-    return await prisma.$transaction(async (tx) => {
-        let total = 0
-        const orderItemsData = []
+  return await prisma.$transaction(async (tx) => {
+    let total = 0
+    const orderItemsData = []
 
-        // 1. Loop orderItems → ambil product asli
-        for (const item of data.orderItems) {
-            const product = await tx.product.findUnique({
-                where: { id: item.productId }
-            })
+    // 1. Loop orderItems → ambil product asli
+    for (const item of data.orderItems) {
+      const product = await tx.product.findUnique({
+        where: { id: item.productId }
+      })
 
-            if (!product) {
-                throw new Error(`Product ID ${item.productId} not found`)
-            }
+      if (!product) {
+        throw new Error(`Product ID ${item.productId} not found`)
+      }
 
-            // 2. Validasi stok
-            if (product.stock < item.quantity) {
-                throw new Error(`Insufficient stock for product ${product.name}`)
-            }
+      // 2. Validasi stok
+      if (product.stock < item.quantity) {
+        throw new Error(`Insufficient stock for product ${product.name}`)
+      }
 
-            // 3. Hitung total dari harga DB
-            const price = Number(product.price)
-            total += price * item.quantity
+      // 3. Hitung total dari harga DB
+      const price = Number(product.price)
+      total += price * item.quantity
 
-            // 4. Siapkan data orderItems
-            orderItemsData.push({
-                productId: item.productId,
-                quantity: item.quantity,
-            })
+      // 4. Siapkan data orderItems
+      orderItemsData.push({
+        productId: item.productId,
+        quantity: item.quantity,
+        priceAtTime: product.price // penting buat histori
+      })
 
-            // 5. Update stok
-            await tx.product.update({
-                where: { id: item.productId },
-                data: {
-                    stock: {
-                        decrement: item.quantity
-                    }
-                }
-            })
+      // 5. Update stok
+      await tx.product.update({
+        where: { id: item.productId },
+        data: {
+          stock: {
+            decrement: item.quantity
+          }
         }
+      })
+    }
 
-        // 6. Create order + orderItems (nested write)
-        const newOrder = await tx.order.create({
-            data: {
-                userId: data.userId,
-                total,
-                orderItems: {
-                    create: orderItemsData
-                }
-            },
-            include: {
-                orderItems: {
-                    include: {
-                        product: true
-                    }
-                }
-            }
-        })
-
-        return newOrder
+    // 6. Create order + orderItems (nested write)
+    const newOrder = await tx.orders.create({
+      data: {
+        userId: data.userId, 
+        total,
+        orderItems: {
+          create: orderItemsData
+        }
+      },
+      include: {
+        orderItems: { 
+          include: {
+            product: true
+          }
+        }
+      }
     })
+
+    return newOrder
+  })
 }

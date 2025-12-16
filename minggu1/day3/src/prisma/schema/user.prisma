@@ -1,10 +1,15 @@
 model User {
-    id            Int    @id @default(autoincrement())
+    id        Int       @id @default(autoincrement())
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime? @db.Timestamptz
+
+    orders Orders[]
+
     name          String
     email         String @unique
     password_hash String
-
-    orders Order[]
+    role          String @default("USER") // <--- Tambahkan ini (USER/ADMIN)
 
     @@map("users")
 }

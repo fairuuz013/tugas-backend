@@ -36,22 +36,7 @@ export const getProductByIdValidation = [
 ];
 
 
-export const apiKey =(req: Request, res: Response, next: NextFunction) => {
-    const apiKey = req.headers['x-api-key'];
-    if (!apiKey) {
-        return res.status(401).json({
-            success: false,
-            message: "Header X-API-Key wajib diisi untuk akses API!"
-        });
-    }
-    if (apiKey !== 'katasandi123') {
-        return res.status(403).json({
-            success: false,
-            message: "API Key tidak valid!"
-        });
-    }
-    next();
-};
+
 
 export const logging = (req: Request, _res: Response, next: NextFunction) => {
     console.log(`Request masuk: ${req.method} ${req.path}`)

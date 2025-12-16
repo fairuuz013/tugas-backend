@@ -1,9 +1,9 @@
-model Order {
+model Orders {
     id     Int     @id @default(autoincrement())
     userId Int
     total  Decimal @db.Decimal(10, 2)
 
-    user       User @relation(fields: [userId], references: [id])
+    user       User         @relation(fields: [userId], references: [id])
     orderItems OrderItems[]
 
     createdAt DateTime  @default(now())

@@ -110,12 +110,20 @@ export interface OrderItems {
 
 
 export const checkout = async (req: Request, res: Response) => {
-    const result = await checkoutOrder(req.body)
-    successResponse(
-        res,
-        "Order berasil dibuat",
-        result,
-        null,
-        201
-    )
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" })
+    }
+
+    const userId = req.user.id
+
+    const order = await checkoutOrder({
+      userId,
+      orderItems: req.body.orderItems
+    })
+
+    res.status(201).json(order)
+  } catch (error: any) {
+    res.status(400).json({ message: error.message })
+  }
 }
