@@ -38,6 +38,11 @@ export type OrderItems = Prisma.OrderItemsModel
  */
 export type Product = Prisma.ProductModel
 /**
+ * Model Profile
+ * 
+ */
+export type Profile = Prisma.ProfileModel
+/**
  * Model User
  * 
  */

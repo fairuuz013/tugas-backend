@@ -31,7 +31,7 @@ export const getById = async (req: Request, res: Response) => {
 
     successResponse(
         res, "Product berhasil di ambil product",
-        
+
         product
     )
 }
@@ -51,14 +51,19 @@ export const search = async (req: Request, res: Response) => {
 
 //4
 export const create = async (req: Request, res: Response) => {
+    const file = req.file
+    if (!file) throw new Error(" image is required")
     const { name, description, price, stock, categoryId } = req.body
+    const imageUrl = `/public/uploads/${file.filename}`;
+
     const data = {
         name: String(name),
-        description: String(description), 
+        description: String(description),
         price: Number(price),
         stock: Number(stock),
         categoryId: Number(categoryId),
-        ...(description && { description: description})
+        ...(description && { description: description }),
+        image: imageUrl,
     }
 
 

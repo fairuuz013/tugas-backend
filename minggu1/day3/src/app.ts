@@ -7,9 +7,10 @@ import categoryRouter from './routes/category.route'
 import orderRouter from './routes/order.route'
 import orderItemRouter from './routes/orderItem.route'
 import authRouter from './routes/auth.route'
+import profileRoute from "./routes/profile.route";
 import { errorHandler } from "./middleware/error.handler";
 import { successResponse } from "./utils/response";
-import { logging } from "./middleware/product.validasion";
+// import { logging } from "./middleware/product.validasion";
 
 
 
@@ -22,12 +23,12 @@ app.use(helmet())
 app.use(cors())
 app.use(morgan('dev'))
 app.use(express.json())
+app.use(express.static("public"))
  
 
-// 1
-app.use (logging)
 
-// 2
+// 1
+// app.use (logging)
 
 
 
@@ -42,7 +43,7 @@ app.get('/', (_req: Request, res: Response) => {
         }
     )
 })
-
+app.use("/profiles", profileRoute);
 app.use('/api/auth', authRouter)
 app.use('/api/ordersItem',orderItemRouter )
 app.use('/api/orders',orderRouter )

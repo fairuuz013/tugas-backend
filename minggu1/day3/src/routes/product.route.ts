@@ -2,6 +2,8 @@ import { Router } from "express";
 import { create, getAll, getById, remove, search, update } from "../controller/product.controller";
 import { createProductValidation, getProductByIdValidation,} from "../middleware/product.validasion";
 import { validate } from "../utils/validator";
+import { authenticate } from "../middleware/auth.middleware";
+import { upload } from "../middleware/upload.middleware";
 
 
 const router = Router()
@@ -22,7 +24,7 @@ router.get('/:id', validate(getProductByIdValidation), getById );
 
 
 // route ke 5 men 
-router.post('/', validate(createProductValidation), create );
+router.post('/', authenticate , upload.single("image") , validate(createProductValidation), create );
 
 
 // route ke 6

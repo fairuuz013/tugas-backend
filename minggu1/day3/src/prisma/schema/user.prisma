@@ -6,10 +6,12 @@ model User {
 
     orders Orders[]
 
-    name          String
-    email         String @unique
+    username      String   @unique
+    email         String   @unique
     password_hash String
-    role          String @default("USER") // <--- Tambahkan ini (USER/ADMIN)
+    role          String   @default("USER")
+
+    profile       Profile?
 
     @@map("users")
 }

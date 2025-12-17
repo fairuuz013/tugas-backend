@@ -74,7 +74,7 @@ export const searchProduct = async (
 
 
 // ROUTE 4
-export const createProduct = async (data: { name: string, description?: string, price: number, stock: number, categoryId?: number }): Promise<Product> => {
+export const createProduct = async (data: { name: string, description?: string, price: number, stock: number, categoryId?: number, image: string }): Promise<Product> => {
     return await prisma.product.create
 
         ({
@@ -84,6 +84,7 @@ export const createProduct = async (data: { name: string, description?: string, 
                 price: data.price,
                 stock: data.stock,
                 categoryId: data.categoryId ?? null,
+                image: data.image
             },
         })
 

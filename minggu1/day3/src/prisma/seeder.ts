@@ -8,11 +8,13 @@ async function main() {
   console.log('🌱 Starting database seeding...');
 
   // Clean existing data (optional - hapus jika tidak ingin menghapus data existing)
-  await prisma.orderItems.deleteMany();
-  await prisma.orders.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.category.deleteMany();
-  await prisma.user.deleteMany();
+ await prisma.orderItems.deleteMany();
+await prisma.orders.deleteMany();
+await prisma.profile.deleteMany(); // ⬅️ WAJIB SEBELUM USER
+await prisma.product.deleteMany();
+await prisma.category.deleteMany();
+await prisma.user.deleteMany(); // ⬅️ TERAKHIR
+
 
   console.log('🧹 Cleaned existing data');
 
@@ -47,7 +49,7 @@ async function main() {
       const password = await bcrypt.hash('password123', 10);
       return prisma.user.create({
         data: {
-          name: faker.person.fullName(),
+          username: faker.person.fullName(),
           email: faker.internet.email().toLowerCase(),
           password_hash: password
         }
@@ -67,7 +69,8 @@ async function main() {
           description: faker.commerce.productDescription(),
           price: faker.commerce.price({ min: 10, max: 1000, dec: 2 }),
           stock: faker.number.int({ min: 0, max: 500 }),
-          categoryId: category.id
+          categoryId: category.id,
+          image: faker.image.url()
         }
       });
     })

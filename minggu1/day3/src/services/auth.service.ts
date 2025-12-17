@@ -7,7 +7,7 @@ import jwt from 'jsonwebtoken';
 const prisma = getPrisma()
 
 export const register = async (data: {
-    name: string;
+    username: string;
     email: string;
     password: string;
     role?: string
@@ -22,7 +22,7 @@ export const register = async (data: {
     const user = await prisma.user.create({
         data: {
             email: data.email,
-            name: data.name,
+            username: data.username,
             password_hash: hashedPassword,
             role: data.role || "USER"
         },
@@ -30,7 +30,7 @@ export const register = async (data: {
 
     return {
         email: user.email,
-        name: user.name,
+        username: user.username,
         role: user.role
     }
 }
@@ -54,7 +54,7 @@ export const login = async (data: { email: string; password: string }) => {
     )
     const userReturn = {
         email: user.email,
-        name: user.name,
+        username: user.username,
         role: user.role
     }
 
