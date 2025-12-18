@@ -1,16 +1,17 @@
 import { Router } from "express";
 import { 
-    getAll,
+
     getById,
     search,
     create,
     update,
-    remove
+    remove,
+    getAllOrderItemsController
 } from "../controller/orderItem.controller";
 
 const router = Router();
 
-router.get("/", getAll);
+router.get("/", getAllOrderItemsController);
 router.get("/search", search);
 router.get("/:id", getById);
 router.post("/", create);

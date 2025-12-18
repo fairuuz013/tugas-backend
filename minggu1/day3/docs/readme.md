@@ -1,89 +1,109 @@
 {
-    "data": {
-        "id": 1,
-        "gender": "male",
-        "address": "Jakata",
-        "profile_picture_url": null,
-        "name": "Fairuuz",
-        "userId": 2,
-        "createdAt": "2025-12-17T09:33:27.735Z",
-        "updatedAt": "2025-12-17T09:33:27.735Z"
-    }
-}
-
-{
-    "message": "Profile berhasil dihapus"
-}
-
-{
-    "message": "Profile berhasil dibuat",
-    "data": {
-        "id": 3,
-        "gender": "male",
-        "address": "Jakarta",
-        "profile_picture_url": "/public/uploads/1765979872333_51918997.jpeg",
-        "name": "Fairuuz",
-        "userId": 54,
-        "createdAt": "2025-12-17T13:57:52.342Z",
-        "updatedAt": "2025-12-17T13:57:52.342Z"
-    }
-}
-
-{
-    "id": 157,
-    "userId": 52,
-    "total": "2144.48",
-    "createdAt": "2025-12-18T00:20:27.190Z",
-    "updatedAt": "2025-12-18T00:20:27.190Z",
-    "deletedAt": null,
-    "orderItems": [
+    "success": true,
+    "message": "Produk berasil diambil",
+    "data": [
         {
-            "id": 442,
-            "orderId": 157,
-            "productId": 4,
-            "quantity": 2,
-            "priceAtTime": "808.89",
-            "createdAt": "2025-12-18T00:20:27.190Z",
-            "updatedAt": "2025-12-18T00:20:27.190Z",
+            "id": 52,
+            "name": "Gorgeous Bamboo Cheese",
+            "description": "Discover the elephant-like agility of our Cheese, perfect for able users",
+            "price": "17.55",
+            "stock": 437,
+            "image": "https://picsum.photos/seed/fMdri1VVRZ/2489/3265",
+            "categoryId": 4,
+            "createdAt": "2025-12-18T00:14:16.223Z",
+            "updatedAt": "2025-12-18T00:14:16.223Z",
             "deletedAt": null,
-            "product": {
+            "category": {
                 "id": 4,
-                "name": "Tasty Cotton Ball",
-                "description": "Professional-grade Bacon perfect for corrupt training and recreational use",
-                "price": "808.89",
-                "stock": 238,
-                "image": "https://picsum.photos/seed/qQ8A7DIE2/1025/800",
-                "categoryId": 4,
-                "createdAt": "2025-12-18T00:14:16.200Z",
-                "updatedAt": "2025-12-18T00:20:27.186Z",
+                "name": "Sports & Outdoors",
+                "createdAt": "2025-12-18T00:14:15.526Z",
+                "updatedAt": "2025-12-18T00:14:15.526Z",
                 "deletedAt": null
             }
         },
         {
-            "id": 443,
-            "orderId": 157,
-            "productId": 8,
-            "quantity": 1,
-            "priceAtTime": "526.7",
-            "createdAt": "2025-12-18T00:20:27.190Z",
-            "updatedAt": "2025-12-18T00:20:27.190Z",
+            "id": 86,
+            "name": "Fresh Wooden Cheese",
+            "description": "Stylish Chips designed to make you stand out with jaunty looks",
+            "price": "50.79",
+            "stock": 285,
+            "image": "https://picsum.photos/seed/lBLSbnqZn/2925/1636",
+            "categoryId": 9,
+            "createdAt": "2025-12-18T00:14:16.235Z",
+            "updatedAt": "2025-12-18T00:14:16.235Z",
             "deletedAt": null,
-            "product": {
+            "category": {
+                "id": 9,
+                "name": "Beauty & Health",
+                "createdAt": "2025-12-18T00:14:15.527Z",
+                "updatedAt": "2025-12-18T00:14:15.527Z",
+                "deletedAt": null
+            }
+        },
+        {
+            "id": 100,
+            "name": "Modern Plastic Mouse",
+            "description": "Our fresh-inspired Keyboard brings a taste of luxury to your self-assured lifestyle",
+            "price": "60.08",
+            "stock": 85,
+            "image": "https://picsum.photos/seed/rygTduQ/2386/2325",
+            "categoryId": 8,
+            "createdAt": "2025-12-18T00:14:16.240Z",
+            "updatedAt": "2025-12-18T00:14:16.240Z",
+            "deletedAt": null,
+            "category": {
                 "id": 8,
-                "name": "Soft Wooden Bacon",
-                "description": "Handmade Pants designed with Concrete for insidious performance",
-                "price": "526.7",
-                "stock": 272,
-                "image": "https://picsum.photos/seed/dlBP4YB/1683/1353",
-                "categoryId": 7,
-                "createdAt": "2025-12-18T00:14:16.197Z",
-                "updatedAt": "2025-12-18T00:20:27.188Z",
+                "name": "Automotive",
+                "createdAt": "2025-12-18T00:14:15.528Z",
+                "updatedAt": "2025-12-18T00:14:15.528Z",
+                "deletedAt": null
+            }
+        },
+        {
+            "id": 12,
+            "name": "Incredible Granite Computer",
+            "description": "Innovative Shoes featuring polite technology and Marble construction",
+            "price": "81.55",
+            "stock": 380,
+            "image": "https://picsum.photos/seed/NAAL7/2519/2317",
+            "categoryId": 3,
+            "createdAt": "2025-12-18T00:14:16.202Z",
+            "updatedAt": "2025-12-18T00:14:16.202Z",
+            "deletedAt": null,
+            "category": {
+                "id": 3,
+                "name": "Books",
+                "createdAt": "2025-12-18T00:14:15.525Z",
+                "updatedAt": "2025-12-18T00:14:15.525Z",
+                "deletedAt": null
+            }
+        },
+        {
+            "id": 65,
+            "name": "Recycled Silk Chair",
+            "description": "Our frog-friendly Soap ensures elegant comfort for your pets",
+            "price": "84.59",
+            "stock": 108,
+            "image": "https://picsum.photos/seed/y0ZFEO0w7f/2965/3706",
+            "categoryId": 10,
+            "createdAt": "2025-12-18T00:14:16.228Z",
+            "updatedAt": "2025-12-18T00:14:16.228Z",
+            "deletedAt": null,
+            "category": {
+                "id": 10,
+                "name": "Office Supplies",
+                "createdAt": "2025-12-18T00:14:15.528Z",
+                "updatedAt": "2025-12-18T00:14:15.528Z",
                 "deletedAt": null
             }
         }
-    ]
+    ],
+    "pagination": {
+        "page": 1,
+        "limit": 5,
+        "total": 100,
+        "totalPages": 20
+    }
 }
-
-
 
 

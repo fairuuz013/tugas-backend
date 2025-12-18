@@ -13,18 +13,35 @@ import {
 
 
 // GET ALL ORDER
-export const getAll = async (_req: Request, res: Response) => {
-    try {
-        const { orders, total } = await getAllOrder();
 
-        return successResponse(res, "Orders berhasil diambil", {
-            jumlah: total,
-            data: orders
-        });
-    } catch (err: any) {
-        return errorResponse(res, err.message);
-    }
-};
+
+export const getAllOrders = async (req: Request, res: Response) => {
+  const page = Number(req.query.page) || 1
+  const limit = Number(req.query.limit) || 10
+  const sortBy = req.query.sortBy as string
+  const sortOrder = (req.query.sortOrder as 'asc' | 'desc') || 'desc'
+
+  const result = await getAllOrder({
+    page,
+    limit,
+    sortBy,
+    sortOrder
+  })
+
+  const pagination = {
+    page: result.currentPage,
+    limit,
+    total: result.total,
+    totalPages: result.totalPages
+  }
+
+  successResponse(
+    res,
+    "Orders berhasil diambil",
+    result.orders,
+    pagination
+  )
+}
 
 
 // GET ORDER BY ID

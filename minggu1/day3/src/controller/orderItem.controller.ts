@@ -11,15 +11,30 @@ import { successResponse, errorResponse } from "../utils/response";
 
 
 // GET ALL
-export const getAll = async (_req: Request, res: Response) => {
-    try {
-        const data = await getAllOrderItems();
-        successResponse(res, "OrderItem berhasil diambil", data);
-    } catch (err: any) {
-        errorResponse(res, err.message);
-    }
-};
 
+export const getAllOrderItemsController = async (req: Request, res: Response) => {
+    const page = Number (req.query.page) || 1
+    const limit = Number (req.query.limit) || 10
+
+    const result = await getAllOrderItems({
+        page,
+        limit
+    })
+
+    const pagination = {
+        page: result.currentPage,
+        limit,
+        total: result.total,
+        totalPages: result.totalPages
+    }
+
+    successResponse(
+        res,
+        "Order items berhasil diambil",
+        result.orderItems,
+        pagination
+    )
+}
 
 // GET BY ID
 export const getById = async (req: Request, res: Response) => {

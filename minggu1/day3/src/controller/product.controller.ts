@@ -2,20 +2,39 @@ import type { Request, Response } from "express"
 import { successResponse } from "../utils/response"
 import { errorResponse } from "../utils/response"
 import { createProduct, deleteProduct, getAllProducts, getProductById, updateProduct, } from "../services/product.services"
-import { searchProduct } from "../services/product.services"
+
 
 
 
 // 1
-export const getAll = async (_req: Request, res: Response) => {
-    const { products, total } = await getAllProducts()
+export const getAll = async (req: Request, res: Response) => {
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || 10
+    const search = req.query.search as any
+    const sortBy = req.query.sortBy as string
+    const sortOrder = (req.query.sortOrder as 'asc' | 'desc') || 'desc'
+
+
+    const result = await getAllProducts({
+        page,
+        limit,
+        search,
+        sortBy,
+        sortOrder
+    })
+
+    const pagination = {
+        page: result.currentPage,
+        limit,
+        total: result.total,
+        totalPages: result.totalPages,
+    }
+
     successResponse(
         res,
-        "anjay berasil",
-        {
-            jumlah: total,
-            data: products
-        }
+        "Produk berasil diambil",
+        result.products,
+        pagination
     )
 }
 
@@ -36,18 +55,18 @@ export const getById = async (req: Request, res: Response) => {
     )
 }
 
-//3
-export const search = async (req: Request, res: Response) => {
-    const { name, max_price, min_price } = req.query;
+// //3
+// export const search = async (req: Request, res: Response) => {
+//     const { name, max_price, min_price } = req.query;
 
-    const result = await searchProduct(name?.toString(), Number(max_price), Number(min_price))
+//     const result = await searchProduct(name?.toString(), Number(max_price), Number(min_price))
 
-    successResponse(
-        res,
-        "Produk berhasil diambil",
-        result
-    )
-}
+//     successResponse(
+//         res,
+//         "Produk berhasil diambil",
+//         result
+//     )
+// }
 
 //4
 export const create = async (req: Request, res: Response) => {

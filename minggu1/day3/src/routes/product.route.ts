@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { create, getAll, getById, remove, search, update } from "../controller/product.controller";
+import { create, getAll, getById, remove, update } from "../controller/product.controller";
 import { createProductValidation, getProductByIdValidation,} from "../middleware/product.validasion";
 import { validate } from "../utils/validator";
 import { authenticate } from "../middleware/auth.middleware";
@@ -16,7 +16,7 @@ const router = Router()
 router.get('/', getAll)
 
 // route ke 3 
-router.get('/search',search );
+
 
 // route 4
 router.get('/:id', validate(getProductByIdValidation), getById );

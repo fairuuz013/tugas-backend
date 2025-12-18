@@ -10,7 +10,7 @@ import authRouter from './routes/auth.route'
 import profileRoute from "./routes/profile.route";
 import { errorHandler } from "./middleware/error.handler";
 import { successResponse } from "./utils/response";
-// import { logging } from "./middleware/product.validasion";
+
 
 
 
@@ -23,12 +23,12 @@ app.use(helmet())
 app.use(cors())
 app.use(morgan('dev'))
 app.use(express.json())
+app.set('query parser', 'extended')
 app.use(express.static("public"))
  
 
 
 // 1
-// app.use (logging)
 
 
 

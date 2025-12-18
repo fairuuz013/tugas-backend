@@ -2,15 +2,29 @@ import type { Request, Response } from "express";
 import { createCategory, deleteCategory, getAllCategory, getCategoryById, searchCategory, updateCategory } from "../services/category.services";
 import { successResponse } from "../utils/response";
 
-export const getAll = async (_req: Request, res: Response) => {
-    const categoris = await getAllCategory()
+
+export const  getAllCategories = async (req: Request, res: Response) => {
+    
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) ||  10 
+
+    const result = await getAllCategory({
+        page,
+        limit 
+    })
+
+    const pagination = {
+        page: result.currentPage,
+        limit,
+        total: result.total,
+        totalPages: result.totalPages
+    }
 
     successResponse(
-        res,
-        "kategori berasil di ambil",
-        categoris,
-        null,
-        200
+        res, 
+        "Order items berasil diambil",
+        result.orderItems,
+        pagination
     )
 }
 

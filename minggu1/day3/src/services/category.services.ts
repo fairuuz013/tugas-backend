@@ -4,14 +4,52 @@ import { getPrisma } from "../prisma"
 
 const prisma = getPrisma()
 
-export const getAllCategory = async () => {
-    return await prisma.category.findMany({
-        where: {
-            deletedAt: null
-        }
-    })
+
+interface FindAllCategoryParams {
+    page: number
+    limit: number
+}
+
+interface CategoryListResponse {
+    orderItems: []
+    categories: Category[]
+    total: number
+    totalPages: number
+    currentPage: number
 
 }
+
+
+
+
+export const getAllCategory = async (params: FindAllCategoryParams): Promise<CategoryListResponse> => {
+    const { page, limit } = params
+    const skip = (page - 1) * limit
+
+        const whereClause = { deletedAt: null }
+
+    const categories = await prisma.category.findMany({
+        skip,
+        take: limit,
+        where: whereClause,
+        orderBy: { createdAt: 'desc' }
+    })
+
+
+    const total = await prisma.category.count({
+        where: whereClause
+    })
+
+
+    return {
+        categories,
+        total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+        orderItems: []
+    }
+}
+
 
 
 export const getCategoryById = async (id: string) => {

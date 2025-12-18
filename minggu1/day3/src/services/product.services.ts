@@ -4,22 +4,58 @@ import { getPrisma } from "../prisma"
 const prisma = getPrisma()
 
 
+interface FindAllParams {
+    page: number,
+    limit: number,
+    search?: {
+        name?: string,
+        min_price?: number,
+        max_price?: number
+    }
+    sortBy?: string,
+    sortOrder?: 'asc' | 'desc';
+}
 
+
+interface ProductListResponse {
+    products: Product[],
+    total: number,
+    totalPages: number,
+    currentPage: number,
+}
 
 // ROUTE PRODUCT 
 // ROUTE 1
-export const getAllProducts = async (): Promise<{ products: Product[], total: number }> => {
-    const products = await prisma.product.findMany(
-        {
-            include: { category: true },
-            where: {
-                deletedAt: null
-            }
-        })
+export const getAllProducts = async (params: FindAllParams): Promise<ProductListResponse> => {
+    const { page, limit, search, sortBy, sortOrder } = params
 
-    const total = products.length
+    const skip = (page - 1) * limit
 
-    return { products, total }
+    const whereClause: any = { deletedAt: null }
+
+    if (search?.name) whereClause.name = { contains: search.name, made: 'insensitive' }
+    if (search?.min_price) whereClause.min_price = { get: search.min_price }
+    if (search?.max_price) whereClause.max_price = { lte: search.max_price }
+
+
+    const products = await prisma.product.findMany({
+        skip: skip,
+        take: limit,
+        where: whereClause,
+        orderBy: sortBy ? { [sortBy]: sortOrder || 'desc' } : { createdAt: 'desc' },
+        include: { category: true }
+    })
+
+    const total = await prisma.product.count({
+        where: whereClause
+    })
+
+    return {
+        products,
+        total,
+        totalPages: Math.ceil(total / limit),
+        currentPage: page,
+    }
 }
 
 
@@ -43,34 +79,34 @@ export const getProductById = async (id: string) => {
 }
 
 // ROUTE 3
-export const searchProduct = async (
-    name?: string,
-    min_price?: number,
-    max_price?: number
-): Promise<Product[]> => {
-    return await prisma.product.findMany({
-        where: {
-            deletedAt: null,
+// export const searchProduct = async (
+//     name?: string,
+//     min_price?: number,
+//     max_price?: number
+// ): Promise<Product[]> => {
+//     return await prisma.product.findMany({
+//         where: {
+//             deletedAt: null,
 
-            ...(name && {
-                name: {
-                    contains: name,
-                    mode: "insensitive",
-                }
-            }),
+//             ...(name && {
+//                 name: {
+//                     contains: name,
+//                     mode: "insensitive",
+//                 }
+//             }),
 
-            ...(min_price || max_price
-                ? {
-                      price: {
-                          ...(min_price && { gte: min_price }),
-                          ...(max_price && { lte: max_price }),
-                      }
-                  }
-                : {})
-        },
-        include: { category: true }
-    });
-};
+//             ...(min_price || max_price
+//                 ? {
+//                     price: {
+//                         ...(min_price && { gte: min_price }),
+//                         ...(max_price && { lte: max_price }),
+//                     }
+//                 }
+//                 : {})
+//         },
+//         include: { category: true }
+//     });
+// };
 
 
 // ROUTE 4
@@ -97,9 +133,9 @@ export const updateProduct = async (id: string, data: Partial<Product>): Promise
     const numId = parseInt(id);
 
     return await prisma.product.update({
-        where: { 
+        where: {
             id: numId,
-            deletedAt: null 
+            deletedAt: null
         },
         data
     });

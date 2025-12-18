@@ -4,18 +4,49 @@ import { getPrisma } from "../prisma";
 const prisma = getPrisma()
 
 
-export const getAllOrder = async (): Promise<{ orders: Orders[], total: number }> => {
-    const orders = await prisma.orders.findMany(
-        {
-            include: { orderItems: true },
-            where: {
-                deletedAt: null
-            }
 
-        })
+interface FindAllOrderParams {
+  page: number
+  limit: number
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+}
 
-    const total = orders.length
-    return { orders, total }
+interface OrdersListResponse {
+  orders: Orders[]
+  total: number
+  totalPages: number
+  currentPage: number
+}
+
+
+export const getAllOrder = async (params:FindAllOrderParams): Promise<OrdersListResponse> => {
+   const { page, limit, sortBy, sortOrder } = params
+   const skip = (page - 1) * limit
+   
+   const whereClause = { deletedAt: null } 
+
+   const orders = await prisma.orders.findMany({
+    skip,
+    take: limit,
+    where: whereClause,
+    include: { orderItems: true },
+    orderBy: sortBy
+    ? { [sortBy]: sortOrder || 'desc' }
+    : { createdAt: 'desc' }
+   })
+
+   const total = await prisma.orders.count({
+    where: whereClause
+   })
+
+   return {
+    orders,
+    total,
+    totalPages: Math.ceil(total / limit),
+    currentPage: page
+  }
+
 }
 
 

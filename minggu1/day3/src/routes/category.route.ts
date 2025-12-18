@@ -5,7 +5,7 @@ import { createCategoryValidation, getCategoryByIdValidation } from "../middlewa
 
 const router = Router()
 
-router.get("/", category.getAll)
+router.get("/", category.getAllCategories)
 
 router.get("/search", category.search);
 
