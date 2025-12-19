@@ -1,6 +1,7 @@
-import type { Category } from "../generated/client"
+import type { Category, Prisma } from "../generated/client"
 import { getPrisma } from "../prisma"
 
+import * as categoryRepo from "../repository/category.repository"
 
 const prisma = getPrisma()
 
@@ -11,8 +12,7 @@ interface FindAllCategoryParams {
 }
 
 interface CategoryListResponse {
-    orderItems: []
-    categories: Category[]
+    orderItems: Category[] 
     total: number
     totalPages: number
     currentPage: number
@@ -21,32 +21,31 @@ interface CategoryListResponse {
 
 
 
+export const getAllCategory = async (
+    params: FindAllCategoryParams
+): Promise<CategoryListResponse> => {
 
-export const getAllCategory = async (params: FindAllCategoryParams): Promise<CategoryListResponse> => {
     const { page, limit } = params
     const skip = (page - 1) * limit
 
-        const whereClause = { deletedAt: null }
+    const whereClause: Prisma.CategoryWhereInput = {
+        deletedAt: null
+    }
 
-    const categories = await prisma.category.findMany({
+    const categories = await categoryRepo.list(
         skip,
-        take: limit,
-        where: whereClause,
-        orderBy: { createdAt: 'desc' }
-    })
+        limit,
+        whereClause,
+        { createdAt: "desc" }
+    )
 
-
-    const total = await prisma.category.count({
-        where: whereClause
-    })
-
+    const total = await categoryRepo.countAll(whereClause)
 
     return {
-        categories,
+        orderItems: categories,
         total,
         totalPages: Math.ceil(total / limit),
-        currentPage: page,
-        orderItems: []
+        currentPage: page
     }
 }
 
@@ -55,12 +54,7 @@ export const getAllCategory = async (params: FindAllCategoryParams): Promise<Cat
 export const getCategoryById = async (id: string) => {
     const numId = parseInt(id)
 
-    return await prisma.category.findUnique({
-        where: {
-            id: numId,
-            deletedAt: null
-        }
-    })
+    return await categoryRepo.findById(numId) 
 }
 
 
@@ -73,54 +67,27 @@ export const createCategory = async (name: string) => {
 }
 
 
-export const updateCategory = async (id: string, data: Category) => {
-    const numId = Number(id);
+export const updateCategory = async (
+  id: string,
+  data: Prisma.CategoryUpdateInput
+) => {
+  const numId = Number(id)
+  if (!numId) throw new Error("ID kategori tidak valid")
 
-    if (!numId) {
-        throw new Error("ID kategori tidak valid");
-    }
+  const isExists = await categoryRepo.findById(numId)
+  if (!isExists) throw new Error("Kategori tidak ditemukan")
 
-    const isExists = await prisma.category.findUnique({
-        where: { id: numId, deletedAt: null }
-    });
-
-    if (!isExists) {
-        throw new Error("Kategori tidak ditemukan");
-    }
-
-    return await prisma.category.update({
-        where: { id: numId, deletedAt: null },
-        data: data
-    });
-};
+  return categoryRepo.update(numId, data)
+}
 
 
-export const searchCategory = async (name?: string): Promise<Category[]> => {
-    return await prisma.category.findMany({
-        where: {
-            deletedAt: null,
-            ...(name && {
-                name: {
-                    contains: name,
-                    mode: "insensitive"
-                }
-            })
-        }
-    });
-};
 
 
 export const deleteCategory = async (id?: string): Promise<Category> => {
 
     const numId = parseInt(id!);
 
-    return await prisma.category.update({
-        where: {
-            id: numId,
-            deletedAt: null
-        },
-        data: { deletedAt: new Date() }
-    });
+    return await categoryRepo.softDelete(numId)
 
 }
 

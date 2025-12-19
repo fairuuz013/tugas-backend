@@ -2,7 +2,6 @@ import type { Request, Response } from "express";
 import { 
     getAllOrderItems,
     getOrderItemById,
-    searchOrderItem,
     createOrderItem,
     updateOrderItem,
     deleteOrderItem
@@ -47,21 +46,7 @@ export const getById = async (req: Request, res: Response) => {
 };
 
 
-// SEARCH (optional)
-export const search = async (req: Request, res: Response) => {
-    try {
-        const { orderId, productId } = req.query;
 
-        const data = await searchOrderItem(
-            orderId ? Number(orderId) : undefined,
-            productId ? Number(productId) : undefined
-        );
-
-        successResponse(res, "Hasil pencarian OrderItem", data);
-    } catch (err: any) {
-        errorResponse(res, err.message);
-    }
-};
 
 
 // CREATE

@@ -55,20 +55,7 @@ export const getById = async (req: Request, res: Response) => {
     )
 }
 
-// //3
-// export const search = async (req: Request, res: Response) => {
-//     const { name, max_price, min_price } = req.query;
 
-//     const result = await searchProduct(name?.toString(), Number(max_price), Number(min_price))
-
-//     successResponse(
-//         res,
-//         "Produk berhasil diambil",
-//         result
-//     )
-// }
-
-//4
 export const create = async (req: Request, res: Response) => {
     const file = req.file
     if (!file) throw new Error(" image is required")

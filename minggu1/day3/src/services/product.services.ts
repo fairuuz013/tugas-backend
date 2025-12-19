@@ -1,8 +1,6 @@
-import type { Product } from "../generated/client"
-import { getPrisma } from "../prisma"
-
-const prisma = getPrisma()
-
+import type { Prisma, Product } from "../generated/client"
+import * as productRepo from '../repository/product.repository'
+import { getOrderById } from "./order.services";
 
 interface FindAllParams {
     page: number,
@@ -31,24 +29,19 @@ export const getAllProducts = async (params: FindAllParams): Promise<ProductList
 
     const skip = (page - 1) * limit
 
-    const whereClause: any = { deletedAt: null }
+    const whereClause: Prisma.ProductWhereInput = { deletedAt: null }
 
-    if (search?.name) whereClause.name = { contains: search.name, made: 'insensitive' }
-    if (search?.min_price) whereClause.min_price = { get: search.min_price }
-    if (search?.max_price) whereClause.max_price = { lte: search.max_price }
+    if (search?.name) whereClause.name = { contains: search.name, mode: 'insensitive' }
+    if (search?.min_price) whereClause.price = { gte: search.min_price }
+    if (search?.max_price) whereClause.price = { lte: search.max_price }
 
+    const sortCriteria: Prisma.ProductOrderByWithRelationInput = sortBy
+        ? { [sortBy]: sortOrder || 'desc' }
+        : { createdAt: 'desc' }
 
-    const products = await prisma.product.findMany({
-        skip: skip,
-        take: limit,
-        where: whereClause,
-        orderBy: sortBy ? { [sortBy]: sortOrder || 'desc' } : { createdAt: 'desc' },
-        include: { category: true }
-    })
+    const products = await productRepo.list(skip, limit, whereClause, sortCriteria)
 
-    const total = await prisma.product.count({
-        where: whereClause
-    })
+    const total = await productRepo.countAll(whereClause)
 
     return {
         products,
@@ -65,10 +58,8 @@ export const getAllProducts = async (params: FindAllParams): Promise<ProductList
 export const getProductById = async (id: string) => {
     const numId = parseInt(id);
 
-    const product = await prisma.product.findUnique({
-        where: { id: numId },
-        include: { category: true }
-    });
+
+    const product = await productRepo.findById(numId)
 
     // manual filter soft delete
     if (!product || product.deletedAt !== null) {
@@ -78,67 +69,21 @@ export const getProductById = async (id: string) => {
     return product;
 }
 
-// ROUTE 3
-// export const searchProduct = async (
-//     name?: string,
-//     min_price?: number,
-//     max_price?: number
-// ): Promise<Product[]> => {
-//     return await prisma.product.findMany({
-//         where: {
-//             deletedAt: null,
-
-//             ...(name && {
-//                 name: {
-//                     contains: name,
-//                     mode: "insensitive",
-//                 }
-//             }),
-
-//             ...(min_price || max_price
-//                 ? {
-//                     price: {
-//                         ...(min_price && { gte: min_price }),
-//                         ...(max_price && { lte: max_price }),
-//                     }
-//                 }
-//                 : {})
-//         },
-//         include: { category: true }
-//     });
-// };
-
 
 // ROUTE 4
 export const createProduct = async (data: { name: string, description?: string, price: number, stock: number, categoryId?: number, image: string }): Promise<Product> => {
-    return await prisma.product.create
-
-        ({
-            data: {
-                name: data.name,
-                description: data.description ?? null,
-                price: data.price,
-                stock: data.stock,
-                categoryId: data.categoryId ?? null,
-                image: data.image
-            },
-        })
-
+    return await productRepo.create(data)
 }
 
 
 
 // ROUTE 5
 export const updateProduct = async (id: string, data: Partial<Product>): Promise<Product> => {
+    await getOrderById(id)
+
     const numId = parseInt(id);
 
-    return await prisma.product.update({
-        where: {
-            id: numId,
-            deletedAt: null
-        },
-        data
-    });
+    return await productRepo.update(numId, data);
 };
 
 
@@ -146,18 +91,12 @@ export const updateProduct = async (id: string, data: Partial<Product>): Promise
 export const deleteProduct = async (id: string): Promise<Product> => {
     const numId = parseInt(id);
 
-    // Cek dulu ada atau nggak + masih belum dihapus
-    const product = await prisma.product.findUnique({
-        where: { id: numId }
-    });
+    const product = await productRepo.findById(numId)
 
     if (!product || product.deletedAt !== null) {
         throw new Error("Product tidak ditemukan atau sudah dihapus");
     }
 
     // Baru update
-    return await prisma.product.update({
-        where: { id: numId },
-        data: { deletedAt: new Date() }
-    });
+    return await productRepo.softDelete(numId)
 };

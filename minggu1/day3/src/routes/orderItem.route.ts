@@ -2,7 +2,7 @@ import { Router } from "express";
 import { 
 
     getById,
-    search,
+   
     create,
     update,
     remove,
@@ -12,7 +12,6 @@ import {
 const router = Router();
 
 router.get("/", getAllOrderItemsController);
-router.get("/search", search);
 router.get("/:id", getById);
 router.post("/", create);
 router.patch("/:id", update);
