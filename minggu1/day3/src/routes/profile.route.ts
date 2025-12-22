@@ -1,18 +1,18 @@
 import { Router } from "express";
-import {
-    createProfile,
-    getMyProfile,
-    updateProfile,
-    deleteProfile
-} from "../controller/profile.controller";
+import prismaInstance from "../prisma";
 import { authenticate } from "../middleware/auth.middleware";
-import { upload } from "../middleware/upload.middleware";
+import { ProfileRepository } from "../repository/profile.repository";
+import { ProfileServices } from "../services/profile.service";
+import { ProfileController } from "../controller/profile.controller";
 
 const router = Router();
 
-router.post("/create", authenticate, upload.single("profile_picture_url")  ,createProfile);
-router.get("/me", authenticate, getMyProfile);
-router.put("/update", authenticate, updateProfile);
-router.delete("/delete", authenticate, deleteProfile);
+const repo = new ProfileRepository(prismaInstance);
+const service = new ProfileServices(repo);
+const controller = new ProfileController(service);
+
+router.get("/me", authenticate, controller.me.bind(controller));
+router.post("/", authenticate, controller.create.bind(controller));
+router.put("/", authenticate, controller.update.bind(controller));
 
 export default router;

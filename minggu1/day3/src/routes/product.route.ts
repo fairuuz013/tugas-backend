@@ -1,40 +1,31 @@
 import { Router } from "express";
-import { create, getAll, getById, remove, update } from "../controller/product.controller";
+import { productController } from "../controller/product.controller";
 import { createProductValidation, getProductByIdValidation,} from "../middleware/product.validasion";
 import { validate } from "../utils/validator";
 import { authenticate } from "../middleware/auth.middleware";
 import { upload } from "../middleware/upload.middleware";
+import { ProductRepository } from "../repository/product.repository";
+import { ProductServices } from "../services/product.services";
+import prismaInstance from "../prisma";
 
 
 const router = Router()
 
 
-// route 1 
 
+export const repo = new ProductRepository(prismaInstance)
+const services = new ProductServices(repo)
+const controller = new productController(services)
 
-// route 2 
-router.get('/', getAll)
+router.get('/', controller.list)
 
-// route ke 3 
+router.get('/:id', validate(getProductByIdValidation), controller.getById );
 
+router.post('/', authenticate , upload.single("image") , validate(createProductValidation), controller.create );
 
-// route 4
-router.get('/:id', validate(getProductByIdValidation), getById );
+router.put('/:id', controller.update);
 
-
-
-// route ke 5 men 
-router.post('/', authenticate , upload.single("image") , validate(createProductValidation), create );
-
-
-// route ke 6
-
-router.put('/:id', update);
-
-
-
-// 7. ROUTE DELETE – Hapus produk
-router.delete('/:id', remove);
+router.delete('/:id', controller.remove);
 
 
 export default router

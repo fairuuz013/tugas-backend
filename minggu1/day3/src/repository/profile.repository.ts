@@ -1,24 +1,46 @@
-import type { Prisma } from "../generated/client"
-import { getPrisma } from "../prisma"
+import type {
+  Prisma,
+  PrismaClient,
+  Profile,
+} from "../generated/client";
 
-const prisma = getPrisma()
-
-export async function findByUserId(userId: number) {
-  return prisma.profile.findUnique({
-    where: { userId }
-  })
+export interface IProfileRepository {
+  findByUserId(userId: number): Promise<Profile | null>;
+  findById(id: number): Promise<Profile | null>;
+  create(data: Prisma.ProfileCreateInput): Promise<Profile>;
+  update(id: number, data: Prisma.ProfileUpdateInput): Promise<Profile>;
 }
 
-export async function create(data: Prisma.ProfileCreateInput) {
-  return prisma.profile.create({ data })
-}
+export class ProfileRepository implements IProfileRepository {
+  constructor(private prisma: PrismaClient) {}
 
-export async function update(
-  userId: number,
-  data: Prisma.ProfileUpdateInput
-) {
-  return prisma.profile.update({
-    where: { userId },
-    data
-  })
+  async findByUserId(userId: number): Promise<Profile | null> {
+    return this.prisma.profile.findUnique({
+      where: { userId },
+      include: { user: true },
+    });
+  }
+
+  async findById(id: number): Promise<Profile | null> {
+    return this.prisma.profile.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+  }
+
+  async create(
+    data: Prisma.ProfileCreateInput
+  ): Promise<Profile> {
+    return this.prisma.profile.create({ data });
+  }
+
+  async update(
+    id: number,
+    data: Prisma.ProfileUpdateInput
+  ): Promise<Profile> {
+    return this.prisma.profile.update({
+      where: { id },
+      data,
+    });
+  }
 }

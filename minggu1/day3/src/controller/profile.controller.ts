@@ -1,84 +1,48 @@
-import type { Request, Response, NextFunction } from "express";
-import * as profileService from "../services/profile.service";
+import type { Request, Response } from "express";
+import { successResponse } from "../utils/response";
+import type { IProfileService } from "../services/profile.service";
 
-export const createProfile = async (
-    req: Request,
-    res: Response,
-) => {
-    const { gender, address, name } = req.body
+export class ProfileController {
+  constructor(private profileService: IProfileService) {}
+
+  // GET MY PROFILE
+  async me(req: Request, res: Response) {
     const userId = req.user!.id;
-    const file = req.file
-    if (!file) {
-        throw new Error(" image is required")
-    }
-    const imageUrl = `/public/uploads/${file.filename}`;
-    const data = { gender: gender, address: address, name: name, profile_picture_url: imageUrl }
 
+    const profile = await this.profileService.getMyProfile(
+      userId
+    );
 
-    const profile = await profileService.createProfile(userId, data);
+    successResponse(res, "Profile ditemukan", profile);
+  }
 
-    res.status(201).json({
-        message: "Profile berhasil dibuat",
-        data: profile
-    });
+  // CREATE PROFILE
+  async create(req: Request, res: Response) {
+    const userId = req.user!.id;
+
+    const profile = await this.profileService.create(
+      userId,
+      req.body
+    );
+
+    successResponse(
+      res,
+      "Profile berhasil dibuat",
+      profile,
+      null,
+      201
+    );
+  }
+
+  // UPDATE PROFILE
+  async update(req: Request, res: Response) {
+    const userId = req.user!.id;
+
+    const profile = await this.profileService.update(
+      userId,
+      req.body
+    );
+
+    successResponse(res, "Profile berhasil diupdate", profile);
+  }
 }
-
-
-
-
-export const updateProfile = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
-    try {
-        const userId = req.user!.id;
-
-        const profile = await profileService.updateProfile(userId, req.body);
-
-        res.status(200).json({
-            message: "Profile berhasil diupdate",
-            data: profile
-        });
-    } catch (error) {
-        next(error);
-    }
-};
-
-
-export const getMyProfile = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
-    try {
-        const userId = req.user!.id;
-
-        const profile = await profileService.getProfileByUserid(userId);
-
-        res.status(200).json({
-            data: profile
-        });
-    } catch (error) {
-        next(error);
-    }
-};
-
-
-export const deleteProfile = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
-    try {
-        const userId = req.user!.id;
-
-        await profileService.deleteProfile(userId);
-
-        res.status(200).json({
-            message: "Profile berhasil dihapus"
-        });
-    } catch (error) {
-        next(error);
-    }
-};

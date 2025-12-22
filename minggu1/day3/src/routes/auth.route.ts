@@ -1,9 +1,16 @@
 import { Router } from "express";
-import * as authController from "../controller/auth.controller"
+import prisma from "../prisma";
+import { AuthRepository } from "../repository/auth.repository";
+import { AuthServices } from "../services/auth.service";
+import { AuthController } from "../controller/auth.controller";
 
-const router = Router()
+const router = Router();
 
-router.post('/login', authController.login)
-router.post('/register', authController.register)
+const repo = new AuthRepository(prisma);
+const service = new AuthServices(repo);
+const controller = new AuthController(service);
 
-export default router
+router.post("/register", controller.register);
+router.post("/login", controller.login);
+
+export default router;

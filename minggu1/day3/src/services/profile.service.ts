@@ -1,80 +1,63 @@
-import type { Profile } from "../generated/client";
-import { getPrisma } from "../prisma";
+import type {
+  Prisma,
+  Profile,
+} from "../generated/client";
+import type { IProfileRepository } from "../repository/profile.repository";
 
-const prisma = getPrisma();
-
-
-export const getProfileByUserid = async (userId: number): Promise<Profile> => {
-    const profile = await prisma.profile.findUnique({
-        where: { userId }
-    });
-    if (!profile) {
-        throw new Error("Profile tidak ditemukan");
-    }
-
-    return profile
-}
-
-
-
-
-
-export const createProfile = async (
+export interface IProfileService {
+  getMyProfile(userId: number): Promise<Profile>;
+  create(
     userId: number,
-    data: {gender: string, address: string, name: string, profile_picture_url: string }
-): Promise<Profile> => {
-
-    const existingProfile = await prisma.profile.findUnique({
-        where: { userId }
-    });
-
-    if (existingProfile) {
-        throw new Error("Profile sudah ada");
-    }
-
-    return await prisma.profile.create({
-        data: {
-            userId,
-            gender: data.gender,
-            address: data.address,
-            name: data.name,
-            profile_picture_url: data.profile_picture_url
-        }
-    })
-}
-
-
-
-export const updateProfile = async (
+    data: Prisma.ProfileCreateInput
+  ): Promise<Profile>;
+  update(
     userId: number,
-    data:  {gender: string, address: string, name: string, profile_picture_url: string }
-): Promise<Profile> => {
-
-    const profile = await prisma.profile.findUnique({
-        where: { userId }
-    });
-
-    if(!profile) {
-        throw new Error("Profile tidak ditemukan");
-    }
-    
-    return await prisma.profile.update({
-        where: { userId },
-        data
-    })
+    data: Prisma.ProfileUpdateInput
+  ): Promise<Profile>;
 }
 
+export class ProfileServices implements IProfileService {
+  constructor(private profileRepo: IProfileRepository) {}
 
-export const deleteProfile = async (userId: number): Promise<Profile> => {
-    const profile = await prisma.profile.findUnique({
-        where: {userId}
-    });
+  // GET PROFILE BY USER LOGIN
+  async getMyProfile(userId: number): Promise<Profile> {
+    const profile = await this.profileRepo.findByUserId(userId);
 
     if (!profile) {
-        throw new Error("Profile tidak ditemukan");
+      throw new Error("Profile belum dibuat");
     }
 
-    return await prisma.profile.delete({
-        where: { userId }
-    })
+    return profile;
+  }
+
+  // CREATE PROFILE (1 USER 1 PROFILE)
+  async create(
+    userId: number,
+    data: Prisma.ProfileCreateInput
+  ): Promise<Profile> {
+    const exists = await this.profileRepo.findByUserId(userId);
+
+    if (exists) {
+      throw new Error("Profile sudah ada");
+    }
+
+    return this.profileRepo.create({
+      ...data,
+      user: { connect: { id: userId } },
+    });
+  }
+
+  // UPDATE PROFILE
+  async update(
+    userId: number,
+    data: Prisma.ProfileUpdateInput
+  ): Promise<Profile> {
+    const profile = await this.profileRepo.findByUserId(userId);
+
+    if (!profile) {
+      throw new Error("Profile tidak ditemukan");
+    }
+
+    return this.profileRepo.update(profile.id, data);
+  }
 }

@@ -1,263 +1,172 @@
-import type { Orders } from "../generated/client";
-import { getPrisma } from "../prisma";
-
-const prisma = getPrisma()
-
+import type { Prisma, Orders } from "../generated/client";
+import type { IOrderRepository } from "../repository/order.repository";
+import type { IProductRepository } from "../repository/product.repository";
 
 
-interface FindAllOrderParams {
-  page: number
-  limit: number
-  sortBy?: string
-  sortOrder?: 'asc' | 'desc'
+type OrderWithItems = Prisma.OrdersGetPayload<{
+  include: {
+    orderItems: {
+      include: {
+        product: true;
+      };
+    };
+  };
+}>;
+
+/* =====================
+   PARAMS & RESPONSE
+===================== */
+
+interface FindAllParams {
+  page: number;
+  limit: number;
+  search?: {
+    userId?: number;
+    status?: string;
+  };
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }
 
-interface OrdersListResponse {
-  orders: Orders[]
-  total: number
-  totalPages: number
-  currentPage: number
+export interface OrderListResponse {
+  orders: Orders[];
+  total: number;
+  totalPages: number;
+  currentPage: number;
 }
 
+/* =====================
+   SERVICE INTERFACE
+===================== */
 
-export const getAllOrder = async (params:FindAllOrderParams): Promise<OrdersListResponse> => {
-   const { page, limit, sortBy, sortOrder } = params
-   const skip = (page - 1) * limit
-   
-   const whereClause = { deletedAt: null } 
+export interface IOrderService {
+  list(params: FindAllParams): Promise<OrderListResponse>;
+  getById(id: string): Promise<Orders | null>;
+  create(data: Prisma.OrdersCreateInput): Promise<Orders>;
+  update(id: string, data: Prisma.OrdersUpdateInput): Promise<Orders>;
+  delete(id: string): Promise<Orders>;
+  checkout(orderId: string): Promise<Orders>;
+}
 
-   const orders = await prisma.orders.findMany({
-    skip,
-    take: limit,
-    where: whereClause,
-    include: { orderItems: true },
-    orderBy: sortBy
-    ? { [sortBy]: sortOrder || 'desc' }
-    : { createdAt: 'desc' }
-   })
+/* =====================
+   SERVICE IMPLEMENTATION
+===================== */
 
-   const total = await prisma.orders.count({
-    where: whereClause
-   })
+export class OrderServices implements IOrderService {
+  constructor(
+    private orderRepo: IOrderRepository,
+    private productRepo: IProductRepository
+  ) { };
 
-   return {
-    orders,
-    total,
-    totalPages: Math.ceil(total / limit),
-    currentPage: page
+  // ROUTE 1 - LIST
+  async list(params: FindAllParams): Promise<OrderListResponse> {
+    const { page, limit, search, sortBy, sortOrder } = params;
+
+    const skip = (page - 1) * limit;
+
+    const whereClause: Prisma.OrdersWhereInput = {
+      deletedAt: null,
+    };
+
+    if (search?.userId) whereClause.userId = search.userId;
+
+    const sortCriteria: Prisma.OrdersOrderByWithRelationInput = sortBy
+      ? { [sortBy]: sortOrder || "desc" }
+      : { createdAt: "desc" };
+
+    const orders = await this.orderRepo.list(
+      skip,
+      limit,
+      whereClause,
+      sortCriteria
+    );
+
+    const total = await this.orderRepo.countAll(whereClause);
+
+    return {
+      orders,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
   }
 
-}
-
-
-
-
-export const getOrderById = async (id: string) => {
+  // ROUTE 2 - GET BY ID
+  async getById(id: string): Promise<Orders | null> {
     const numId = parseInt(id);
 
-    const order = await prisma.orders.findUnique({
-        where: { id: numId },
-        include: {
-            user: true,
-            orderItems: {
-                include: {
-                    product: true
-                }
-            }
-        }
-    })
+    const order = await this.orderRepo.findById(numId);
 
-    // manual soft delete check
     if (!order || order.deletedAt !== null) {
-        throw new Error("Order tidak ditemukan");
+      throw new Error("Orders tidak ditemukan");
     }
 
     return order;
-};
+  }
 
+  // ROUTE 4 - CREATE
+  async create(data: Prisma.OrdersCreateInput): Promise<Orders> {
+    return await this.orderRepo.create(data);
+  }
 
+  // ROUTE 5 - UPDATE
+  async update(id: string, data: Prisma.OrdersUpdateInput): Promise<Orders> {
+    const numId = parseInt(id);
+    return await this.orderRepo.update(numId, data);
+  }
 
+  // ROUTE 6 - DELETE (SOFT)
+  async delete(id: string): Promise<Orders> {
+    const numId = parseInt(id);
 
-export const searchOrder = async (
-    userId?: number,
-    min_total?: number,
-    max_total?: number
-): Promise<Orders[]> => {
-    return await prisma.orders.findMany({
-        where: {
-            deletedAt: null,
+    const order = await this.orderRepo.findById(numId);
 
-            ...(userId && { userId }),
-
-            ...(min_total || max_total
-                ? {
-                    total: {
-                        ...(min_total && { gte: min_total }),
-                        ...(max_total && { lte: max_total }),
-                    }
-                }
-                : {})
-        },
-        include: {
-            orderItems: {
-                include: { product: true }
-            }
-        }
-    });
-};
-
-
-
-export const createOrder = async (data: {
-  userId: number,
-  items: {
-    productId: number,
-    quantity: number
-  }[]
-}) => {
-  const products = await Promise.all(
-    data.items.map(async (item) => {
-      const product = await prisma.product.findUnique({
-        where: { id: item.productId }
-      });
-
-      if (!product) throw new Error("Produk tidak ditemukan");
-
-      return {
-        productId: item.productId,
-        quantity: item.quantity,
-        price: product.price
-      };
-    })
-  );
-
-  const total = products.reduce(
-    (sum, item) => sum + Number(item.price) * item.quantity,
-    0
-  );
-
-  return await prisma.orders.create({
-    data: {
-      userId: data.userId,
-      total,
-      orderItems: {
-        create: products.map(p => ({
-          productId: p.productId,
-          quantity: p.quantity,
-          priceAtTime: p.price 
-        }))
-      }
+    if (!order || order.deletedAt !== null) {
+      throw new Error("Orders tidak ditemukan atau sudah dihapus");
     }
+
+    return await this.orderRepo.softDelete(numId);
+  }
+
+
+  // ROUTE 7 CHECKOUT 
+
+  async checkout(orderId: string): Promise<Orders> {
+  const id = parseInt(orderId);
+
+  const order = await this.orderRepo.findById(id) as OrderWithItems;
+
+  if (!order || order.deletedAt !== null) {
+    throw new Error("Order tidak ditemukan");
+  }
+
+  if (order.status !== "PENDING") {
+    throw new Error("Order sudah di checkout");
+  }
+
+  // VALIDASI STOCK
+  for (const item of order.orderItems) {
+    if (item.product.stock < item.quantity) {
+      throw new Error(
+        `Stock produk ${item.product.name} tidak cukup`
+      );
+    }
+  }
+
+  // KURANGI STOCK
+  for (const item of order.orderItems) {
+    await this.productRepo.update(item.productId, {
+      stock: item.product.stock - item.quantity,
+    });
+  }
+
+  // UPDATE STATUS
+  return await this.orderRepo.update(id, {
+    status: "PAID",
   });
-};
-
-
-
-export const updateOrder = async (id: string, data: Partial<Orders>): Promise<Orders> => {
-    const numId = parseInt(id);
-
-    return await prisma.orders.update({
-        where: {
-            id: numId,
-            deletedAt: null
-        },
-        data
-    });
-};
-
-
-
-
-
-export const deleteOrder = async (id: string): Promise<Orders> => {
-    const numId = parseInt(id);
-
-    return await prisma.orders.update({
-        where: {
-            id: numId,
-            deletedAt: null
-        },
-        data: {
-            deletedAt: new Date()
-        }
-    });
-};
-
-
-
-export interface CreateOrder {
-    userId: number
-
-    orderItems: OrderItems[]
-
 }
 
-export interface OrderItems {
-    orderId: number
-    productId: number
-    quantity: number
-}
 
-export const checkoutOrder = async (data: CreateOrder) => {
-  return await prisma.$transaction(async (tx) => {
-    let total = 0
-    const orderItemsData = []
 
-    // 1. Loop orderItems → ambil product asli
-    for (const item of data.orderItems) {
-      const product = await tx.product.findUnique({
-        where: { id: item.productId }
-      })
 
-      if (!product) {
-        throw new Error(`Product ID ${item.productId} not found`)
-      }
-
-      // 2. Validasi stok
-      if (product.stock < item.quantity) {
-        throw new Error(`Insufficient stock for product ${product.name}`)
-      }
-
-      // 3. Hitung total dari harga DB
-      const price = Number(product.price)
-      total += price * item.quantity
-
-      // 4. Siapkan data orderItems
-      orderItemsData.push({
-        productId: item.productId,
-        quantity: item.quantity,
-        priceAtTime: product.price // penting buat histori
-      })
-
-      // 5. Update stok
-      await tx.product.update({
-        where: { id: item.productId },
-        data: {
-          stock: {
-            decrement: item.quantity
-          }
-        }
-      })
-    }
-
-    // 6. Create order + orderItems (nested write)
-    const newOrder = await tx.orders.create({
-      data: {
-        userId: data.userId, 
-        total,
-        orderItems: {
-          create: orderItemsData
-        }
-      },
-      include: {
-        orderItems: { 
-          include: {
-            product: true
-          }
-        }
-      }
-    })
-
-    return newOrder
-  })
 }

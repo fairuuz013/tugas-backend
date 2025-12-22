@@ -1,14 +1,13 @@
-import { getPrisma } from '../prisma';
+import prisma  from '../prisma';
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcrypt';
 
-const prisma = getPrisma();
 
 async function main() {
   console.log('🌱 Starting database seeding...');
 
   // Clean existing data (optional - hapus jika tidak ingin menghapus data existing)
- await prisma.orderItems.deleteMany();
+await prisma.orderItems.deleteMany();
 await prisma.orders.deleteMany();
 await prisma.profile.deleteMany(); // ⬅️ WAJIB SEBELUM USER
 await prisma.product.deleteMany();

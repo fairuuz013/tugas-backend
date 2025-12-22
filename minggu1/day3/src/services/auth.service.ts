@@ -1,62 +1,76 @@
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import config from "../utils/env";
+import type { IAuthRepository } from "../repository/auth.repository";
 
-import { getPrisma } from '../prisma';
-import config from '../utils/env'
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken';
-
-const prisma = getPrisma()
-
-export const register = async (data: {
+export interface IAuthService {
+  register(data: {
     username: string;
     email: string;
     password: string;
-    role?: string
-}) => {
-    const existingUser = await prisma.user.findUnique({ where: { email: data.email } })
-    if (existingUser) {
-        throw new Error("Email sudah terdaftar")
-    }
+    role?: string;
+  }): Promise<any>;
 
-    const hashedPassword = await bcrypt.hash(data.password, 10)
-
-    const user = await prisma.user.create({
-        data: {
-            email: data.email,
-            username: data.username,
-            password_hash: hashedPassword,
-            role: data.role || "USER"
-        },
-    })
-
-    return {
-        email: user.email,
-        username: user.username,
-        role: user.role
-    }
+  login(data: {
+    email: string;
+    password: string;
+  }): Promise<any>;
 }
 
-export const login = async (data: { email: string; password: string }) => {
-    const user = await prisma.user.findUnique({ where: { email: data.email } })
-    if (!user) {
-        throw new Error("Email atau password salah")
+export class AuthServices implements IAuthService {
+  constructor(private authRepo: IAuthRepository) {}
+
+  async register(data: {
+    username: string;
+    email: string;
+    password: string;
+    role?: string;
+  }) {
+    const existingUser = await this.authRepo.findByEmail(data.email);
+    if (existingUser) {
+      throw new Error("Email sudah terdaftar");
     }
 
-    const isValid = await bcrypt.compare(data.password, user.password_hash)
-    if (!isValid) {
-        throw new Error("Email atau password salah")
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    const user = await this.authRepo.createUser({
+      username: data.username,
+      email: data.email,
+      password_hash: hashedPassword,
+      role: data.role ?? "USER",
+    });
+
+    return {
+      username: user.username,
+      email: user.email,
+      role: user.role,
+    };
+  }
+
+  async login(data: { email: string; password: string }) {
+    const user = await this.authRepo.findByEmail(data.email);
+    if (!user) {
+      throw new Error("Email atau password salah");
     }
-    
+
+    const isValid = await bcrypt.compare(data.password, user.password_hash);
+    if (!isValid) {
+      throw new Error("Email atau password salah");
+    }
 
     const token = jwt.sign(
-        { id: user.id, role: user.role },
-        config.JWT_SECRET,
-        { expiresIn: '1h' }
-    )
-    const userReturn = {
+      { id: user.id, role: user.role },
+      config.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    return {
+      user: {
         email: user.email,
         username: user.username,
-        role: user.role
-    }
-
-    return { userReturn, token }
+        role: user.role,
+      },
+      token,
+    };
+  }
 }

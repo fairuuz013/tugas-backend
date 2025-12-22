@@ -1,16 +1,26 @@
-import { Router } from "express";
-import * as OrderController from "../controller/order.controller";
-import { authenticate } from "../middleware/auth.middleware";
+import { Router } from "express"
+import { OrderController } from "../controller/order.controller"
+import { OrderRepository } from "../repository/order.repository"
+import { OrderServices } from "../services/order.services"
+import prismaInstance from "../prisma"
+import { authenticate } from "../middleware/auth.middleware"
+import { repo as repoProduct } from "../routes/product.route"
 
 
-const router = Router();
+const router = Router()
 
-router.get("/", OrderController. getAllOrders);
-router.get("/search", OrderController.search);
-router.get("/:id", OrderController.getById);
-router.post("/checkout", authenticate, OrderController.checkout)
-router.post("/", OrderController.create);
-router.put("/:id", OrderController.update);
-router.delete("/:id", OrderController.remove);
+const repo = new OrderRepository(prismaInstance)
+const service = new OrderServices(repo,repoProduct )
+const orderController = new OrderController(service)
 
-export default router;
+
+router.get("/", orderController.list)
+router.get("/:id", orderController.getById)
+router.post("/", authenticate, orderController.create)
+router.put("/:id", orderController.update)
+router.delete("/:id", orderController.remove)
+
+// 🔥 CHECKOUT
+router.post("/:id/checkout", authenticate, orderController.checkout)
+
+export default router
