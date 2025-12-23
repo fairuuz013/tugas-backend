@@ -28,6 +28,8 @@ export interface IProductService {
     create  (data: { name: string, description?: string, price: number, stock: number, categoryId?: number, image: string }): Promise<Product>
     update (id: string, data: Partial<Product>): Promise<Product>
     delete  (id: string): Promise<Product>
+    exec(): Promise< {overview: any, byCategory: any }>
+    
 }
 
 
@@ -61,6 +63,8 @@ export class ProductServices implements IProductService {
          totalPages: Math.ceil(total / limit),
          currentPage: page,
      }
+
+     
     }
     
     
@@ -112,5 +116,18 @@ export class ProductServices implements IProductService {
      // Baru update
      return await this.productRepo.softDelete(numId)
     };
+
+    async exec() {
+         const stats = await this.productRepo.getStats();
+    const categoryStats = await this.productRepo.getProductsByCategoryStats();
+    
+    return {
+      overview: stats,
+      byCategory: categoryStats
+    };
+  
+    }
+
+
 }
    

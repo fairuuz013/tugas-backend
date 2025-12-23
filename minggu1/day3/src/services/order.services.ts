@@ -46,6 +46,8 @@ export interface IOrderService {
   update(id: string, data: Prisma.OrdersUpdateInput): Promise<Orders>;
   delete(id: string): Promise<Orders>;
   checkout(orderId: string): Promise<Orders>;
+  execStats(): Promise<{ overview: any; byUser: any }>;
+  findComplex(userId: string, minTotal: number): Promise<Orders[]>;
 }
 
 /* =====================
@@ -132,41 +134,63 @@ export class OrderServices implements IOrderService {
   // ROUTE 7 CHECKOUT 
 
   async checkout(orderId: string): Promise<Orders> {
-  const id = parseInt(orderId);
+    const id = parseInt(orderId);
 
-  const order = await this.orderRepo.findById(id) as OrderWithItems;
+    const order = await this.orderRepo.findById(id) as OrderWithItems;
 
-  if (!order || order.deletedAt !== null) {
-    throw new Error("Order tidak ditemukan");
-  }
-
-  if (order.status !== "PENDING") {
-    throw new Error("Order sudah di checkout");
-  }
-
-  // VALIDASI STOCK
-  for (const item of order.orderItems) {
-    if (item.product.stock < item.quantity) {
-      throw new Error(
-        `Stock produk ${item.product.name} tidak cukup`
-      );
+    if (!order || order.deletedAt !== null) {
+      throw new Error("Order tidak ditemukan");
     }
-  }
 
-  // KURANGI STOCK
-  for (const item of order.orderItems) {
-    await this.productRepo.update(item.productId, {
-      stock: item.product.stock - item.quantity,
+    if (order.status !== "PENDING") {
+      throw new Error("Order sudah di checkout");
+    }
+
+    // VALIDASI STOCK
+    for (const item of order.orderItems) {
+      if (item.product.stock < item.quantity) {
+        throw new Error(
+          `Stock produk ${item.product.name} tidak cukup`
+        );
+      }
+    }
+
+    // KURANGI STOCK
+    for (const item of order.orderItems) {
+      await this.productRepo.update(item.productId, {
+        stock: item.product.stock - item.quantity,
+      });
+    }
+
+    // UPDATE STATUS
+    return await this.orderRepo.update(id, {
+      status: "PAID",
     });
   }
+  
+  async execStats(){
+    const overview = await this.orderRepo.getStats();
+    const byUser = await this.orderRepo.getOrdersByUserStats();
 
-  // UPDATE STATUS
-  return await this.orderRepo.update(id, {
-    status: "PAID",
-  });
-}
+    return {
+      overview,
+      byUser
+    }    
+  }
 
 
+
+  async findComplex(userId: string, minTotal: number): Promise<Orders[]> {
+    const uid = parseInt(userId);
+
+    if (isNaN(uid)) {
+      throw new Error ("User tidak valid");
+    }
+
+    return await this.orderRepo.findComplex(uid, minTotal)
+  }
+
+  
 
 
 }

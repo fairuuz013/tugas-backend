@@ -32,14 +32,22 @@ export interface ICategoryService {
   create(data: Prisma.CategoryCreateInput): Promise<Category>;
   update(id: string, data: Prisma.CategoryUpdateInput): Promise<Category>;
   delete(id: string): Promise<Category>;
+  findComplex(name: string, maxProductPrice: number): Promise<Category[]>;
+  getOverview(): Promise<{
+    totalCategories: number;
+  }>;
+
 }
+
+
+
 
 /* =====================
    SERVICE IMPLEMENTATION
 ===================== */
 
 export class CategoryServices implements ICategoryService {
-  constructor(private categoryRepo: ICategoryRepository) {}
+  constructor(private categoryRepo: ICategoryRepository) { }
 
   // ROUTE 1 - LIST
   async list(params: FindAllParams): Promise<CategoryListResponse> {
@@ -112,4 +120,29 @@ export class CategoryServices implements ICategoryService {
 
     return await this.categoryRepo.softDelete(numId);
   }
+
+  async findComplex(
+    name: string,
+    maxProductPrice: number
+  ): Promise<Category[]> {
+
+    if (!name && !maxProductPrice) {
+      throw new Error("Minimal salah satu parameter harus diisi");
+    }
+
+    return await this.categoryRepo.findComplex(
+      name,
+      maxProductPrice
+    );
+  }
+
+  async getOverview() {
+    const stats = await this.categoryRepo.getStats();
+
+    return {
+      totalCategories: stats._count.id,
+    };
+  }
+
 }
+

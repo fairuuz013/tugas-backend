@@ -302,8 +302,8 @@ export type OrdersScalarWhereWithAggregatesInput = {
 export type OrdersCreateInput = {
   total: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: string
-  createdAt: Date | string
-  updatedAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   deletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
   orderItems?: Prisma.OrderItemsCreateNestedManyWithoutOrderInput
@@ -314,8 +314,8 @@ export type OrdersUncheckedCreateInput = {
   userId: number
   total: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: string
-  createdAt: Date | string
-  updatedAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   deletedAt?: Date | string | null
   orderItems?: Prisma.OrderItemsUncheckedCreateNestedManyWithoutOrderInput
 }
@@ -346,8 +346,8 @@ export type OrdersCreateManyInput = {
   userId: number
   total: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: string
-  createdAt: Date | string
-  updatedAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   deletedAt?: Date | string | null
 }
 
@@ -493,8 +493,8 @@ export type OrdersUncheckedUpdateManyWithoutUserNestedInput = {
 export type OrdersCreateWithoutOrderItemsInput = {
   total: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: string
-  createdAt: Date | string
-  updatedAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   deletedAt?: Date | string | null
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
 }
@@ -504,8 +504,8 @@ export type OrdersUncheckedCreateWithoutOrderItemsInput = {
   userId: number
   total: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: string
-  createdAt: Date | string
-  updatedAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   deletedAt?: Date | string | null
 }
 
@@ -547,8 +547,8 @@ export type OrdersUncheckedUpdateWithoutOrderItemsInput = {
 export type OrdersCreateWithoutUserInput = {
   total: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: string
-  createdAt: Date | string
-  updatedAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   deletedAt?: Date | string | null
   orderItems?: Prisma.OrderItemsCreateNestedManyWithoutOrderInput
 }
@@ -557,8 +557,8 @@ export type OrdersUncheckedCreateWithoutUserInput = {
   id?: number
   total: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: string
-  createdAt: Date | string
-  updatedAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   deletedAt?: Date | string | null
   orderItems?: Prisma.OrderItemsUncheckedCreateNestedManyWithoutOrderInput
 }
@@ -606,8 +606,8 @@ export type OrdersCreateManyUserInput = {
   id?: number
   total: runtime.Decimal | runtime.DecimalJsLike | number | string
   status?: string
-  createdAt: Date | string
-  updatedAt: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   deletedAt?: Date | string | null
 }
 

@@ -19,6 +19,8 @@ const controller = new productController(services)
 
 router.get('/', controller.list)
 
+router.get('/stats', controller.getStats)
+
 router.get('/:id', validate(getProductByIdValidation), controller.getById );
 
 router.post('/', authenticate , upload.single("image") , validate(createProductValidation), controller.create );

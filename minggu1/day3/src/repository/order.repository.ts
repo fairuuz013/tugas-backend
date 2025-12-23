@@ -12,6 +12,14 @@ export interface IOrderRepository {
     create(data: Prisma.OrdersCreateInput): Promise<Orders>;
     update(id: number, data: Prisma.OrdersUpdateInput): Promise<Orders>;
     softDelete(id: number): Promise<Orders>;
+     findComplex(
+        userId: number,
+        minTotal: number
+    ): Promise<Orders[]>;
+
+    getStats(): Promise<any>;
+
+    getOrdersByUserStats(): Promise<any>;
 }
 
 export class OrderRepository implements IOrderRepository {
@@ -84,4 +92,45 @@ async findById(id: number) {
             },
         });
     }
+
+    async findComplex(userId: number, minTotal: number): Promise<Orders[]> {
+        return await this.prisma.orders.findMany({
+            where: {
+                deletedAt: null,
+                userId,
+                orderItems: {
+                    some: {
+                        priceAtTime: {
+                            gt: minTotal,
+                        },
+                    },
+                },
+            },
+            include: {
+                orderItems: {
+                    include: {
+                        product: true
+                    }
+                }
+            }
+        })
+    }
+
+    async getStats() {
+        return await this.prisma.orders.aggregate({
+            _count: { id: true },
+            _min: { createdAt: true },
+            _max: { createdAt: true },
+        })
+    }
+
+
+   async getOrdersByUserStats() {
+    return await this.prisma.orders.groupBy({
+        by: ['userId'],
+        _count: { id: true },
+    });
+}
+ 
+
 }

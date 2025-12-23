@@ -1,23 +1,22 @@
-import prisma  from '../prisma';
+import prisma from '../prisma';
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcrypt';
-
 
 async function main() {
   console.log('🌱 Starting database seeding...');
 
-  // Clean existing data (optional - hapus jika tidak ingin menghapus data existing)
-await prisma.orderItems.deleteMany();
-await prisma.orders.deleteMany();
-await prisma.profile.deleteMany(); // ⬅️ WAJIB SEBELUM USER
-await prisma.product.deleteMany();
-await prisma.category.deleteMany();
-await prisma.user.deleteMany(); // ⬅️ TERAKHIR
-
+  // 🧹 CLEAN DATABASE (URUTAN PENTING)
+  await prisma.orderItems.deleteMany();
+  await prisma.orders.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.user.deleteMany();
 
   console.log('🧹 Cleaned existing data');
 
-  // 1. Create Categories (10 categories)
+  // =========================
+  // 1️⃣ CATEGORIES
+  // =========================
   console.log('📦 Creating categories...');
   const categoryNames = [
     'Electronics',
@@ -39,9 +38,12 @@ await prisma.user.deleteMany(); // ⬅️ TERAKHIR
       })
     )
   );
+
   console.log(`✅ Created ${categories.length} categories`);
 
-  // 2. Create Users (50 users)
+  // =========================
+  // 2️⃣ USERS
+  // =========================
   console.log('👥 Creating users...');
   const users = await Promise.all(
     Array.from({ length: 50 }, async () => {
@@ -55,10 +57,13 @@ await prisma.user.deleteMany(); // ⬅️ TERAKHIR
       });
     })
   );
+
   console.log(`✅ Created ${users.length} users`);
 
-  // 3. Create Products (100 products)
-  console.log('🛍️  Creating products...');
+  // =========================
+  // 3️⃣ PRODUCTS
+  // =========================
+  console.log('🛍️ Creating products...');
   const products = await Promise.all(
     Array.from({ length: 100 }, () => {
       const category = faker.helpers.arrayElement(categories);
@@ -66,41 +71,53 @@ await prisma.user.deleteMany(); // ⬅️ TERAKHIR
         data: {
           name: faker.commerce.productName(),
           description: faker.commerce.productDescription(),
-          price: faker.commerce.price({ min: 10, max: 1000, dec: 2 }),
+          price: Number(
+            faker.commerce.price({ min: 10, max: 1000, dec: 2 })
+          ),
           stock: faker.number.int({ min: 0, max: 500 }),
-          categoryId: category.id,
-          image: faker.image.url()
+          image: faker.image.url(),
+          category: {
+            connect: { id: category.id }
+          }
         }
       });
     })
   );
+
   console.log(`✅ Created ${products.length} products`);
 
-  // 4. Create Orders (150 orders)
+  // =========================
+  // 4️⃣ ORDERS + ORDER ITEMS
+  // =========================
   console.log('🛒 Creating orders...');
   const orders = [];
+
   for (let i = 0; i < 150; i++) {
     const user = faker.helpers.arrayElement(users);
     const numItems = faker.number.int({ min: 1, max: 5 });
-    const orderProducts = faker.helpers.arrayElements(products, numItems);
-    
-    // Calculate total
+    const selectedProducts = faker.helpers.arrayElements(products, numItems);
+
     let total = 0;
-    const orderItemsData = orderProducts.map((product) => {
+
+    const orderItemsData = selectedProducts.map((product) => {
       const quantity = faker.number.int({ min: 1, max: 5 });
-      const itemTotal = Number(product.price) * quantity;
-      total += itemTotal;
-      
+      total += Number(product.price) * quantity;
+
       return {
-        productId: product.id,
+        product: {
+          connect: { id: product.id }
+        },
         quantity
       };
     });
 
     const order = await prisma.orders.create({
       data: {
-        userId: user.id,
-        total: total.toFixed(2),
+        user: {
+          connect: { id: user.id }
+        },
+        total: total,
+        status: 'PAID',
         orderItems: {
           create: orderItemsData
         }
@@ -112,8 +129,12 @@ await prisma.user.deleteMany(); // ⬅️ TERAKHIR
 
     orders.push(order);
   }
+
   console.log(`✅ Created ${orders.length} orders`);
-  // Summary
+
+  // =========================
+  // 📊 SUMMARY
+  // =========================
   const totalOrderItems = orders.reduce(
     (sum, order) => sum + order.orderItems.length,
     0

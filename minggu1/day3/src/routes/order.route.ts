@@ -15,6 +15,8 @@ const orderController = new OrderController(service)
 
 
 router.get("/", orderController.list)
+router.get("/orders/stats", orderController.getStats);
+router.get("/orders/complex", orderController.findComplex);
 router.get("/:id", orderController.getById)
 router.post("/", authenticate, orderController.create)
 router.put("/:id", orderController.update)

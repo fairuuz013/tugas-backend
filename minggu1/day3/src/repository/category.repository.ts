@@ -17,10 +17,21 @@ export interface ICategoryRepository {
   update(id: number, data: Prisma.CategoryUpdateInput): Promise<Category>;
 
   softDelete(id: number): Promise<Category>;
+
+   findComplex(
+    name: string,
+    maxProductPrice: number
+  ): Promise<Category[]>;
+
+  getStats(): Promise<{
+    _count: {
+      id: number;
+    };
+  }>;
 }
 
 export class CategoryRepository implements ICategoryRepository {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaClient) { }
 
   async list(
     skip: number,
@@ -63,4 +74,50 @@ export class CategoryRepository implements ICategoryRepository {
       data: { deletedAt: new Date() },
     });
   }
+
+
+  async findComplex(
+    name: string,
+    maxProductPrice: number
+  ): Promise<Category[]> {
+    return await this.prisma.category.findMany({
+      where: {
+        deletedAt: null,
+
+        OR: [
+          // CATEGORY BERDASARKAN NAMA
+          {
+            name: {
+              contains: name,
+              mode: "insensitive",
+            },
+          },
+
+          // Category yang punya product murah 
+          {
+            products: {
+              some: {
+                price: {
+                  lt: maxProductPrice,
+                },
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        products: true,
+      },
+    });
+  }
+
+
+  async getStats() {
+    return await this.prisma.category.aggregate({
+      _count: {
+        id: true,
+      },
+    });
+  }
+
 }

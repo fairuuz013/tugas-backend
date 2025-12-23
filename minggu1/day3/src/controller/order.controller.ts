@@ -2,6 +2,7 @@ import type { Request, Response } from "express"
 import { successResponse } from "../utils/response"
 import type { IOrderService } from "../services/order.services"
 
+
 export interface IOrderController {
   list(req: Request, res: Response): Promise<void>
   getById(req: Request, res: Response): Promise<void>
@@ -9,10 +10,21 @@ export interface IOrderController {
   update(req: Request, res: Response): Promise<void>
   remove(req: Request, res: Response): Promise<void>
   checkout(req: Request, res: Response): Promise<void>
+  getStats(req: Request, res: Response): Promise<void>
+  findComplex(req: Request, res: Response): Promise<void>
 }
 
 export class OrderController implements IOrderController {
-  constructor(private orderService: IOrderService) {}
+  constructor(private orderService: IOrderService) {
+    this.list = this.list.bind(this)
+    this.getById = this.getById.bind(this)
+    this.create = this.create.bind(this)
+    this.update = this.update.bind(this)
+    this.remove = this.remove.bind(this)
+    this.checkout = this.checkout.bind(this)
+    this.findComplex = this.findComplex.bind(this)
+    this.getStats = this.getStats.bind(this)
+   }
 
   async list(req: Request, res: Response) {
     const page = Number(req.query.page) || 1
@@ -60,4 +72,38 @@ export class OrderController implements IOrderController {
     const order = await this.orderService.checkout(req.params.id!)
     successResponse(res, "Checkout berhasil", order)
   }
+
+  async getStats(_req: Request, res: Response) {
+  const stats = await this.orderService.execStats();
+
+  successResponse(
+    res,
+    "Statistik order berhasil diambil",
+    stats,
+    null,
+    200
+  );
+}
+
+async findComplex(req: Request, res: Response) {
+
+  const { userId, minTotal } = req.query;
+
+  if (!userId || ! minTotal) {
+    throw new Error("User id dan minTotal wajid diisi")
+  }
+
+  
+  const orders = await this.orderService.findComplex(
+    String(userId),
+    Number(minTotal)
+  );
+
+  successResponse(
+    res,
+    "Order kompleks berhasil diambil",
+    orders
+  );
+}
+
 }

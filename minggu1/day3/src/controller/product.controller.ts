@@ -8,10 +8,18 @@ export interface IProductController {
     create(req: Request, res: Response): Promise<void>
     update(req: Request, res: Response): Promise<void>
     remove(req: Request, res: Response): Promise<void>
+    getStats(_req: Request, res: Response): Promise<void>
 }
 
 export class productController implements IProductController {
-    constructor(private productService: IProductService) { }
+    constructor(private productService: IProductService) {
+        this.list = this.list.bind(this)
+        this.getById = this.getById.bind(this)
+        this.create = this.create.bind(this)
+        this.update = this.update.bind(this)
+        this.remove = this.remove.bind(this)
+        this.getStats = this.getStats.bind(this)
+     }
 
     // 1
      async list  (req: Request, res: Response) {
@@ -41,7 +49,7 @@ export class productController implements IProductController {
             res,
             "Produk berasil diambil",
             result.products,
-            pagination
+            pagination,
         )
     }
     
@@ -50,9 +58,11 @@ export class productController implements IProductController {
         const product = await this.productService.getById(req.params.id!)
     
         successResponse(
-            res, "Product berhasil di ambil product",
-    
-            product
+            res,
+             "Product berhasil di ambil product",
+            product,
+            null,
+            200
         )
     }
     
@@ -92,7 +102,9 @@ export class productController implements IProductController {
         successResponse(
             res,
             "product berasil di update",
-            product
+            product,
+            null,
+            200
         )
     
     }
@@ -104,7 +116,20 @@ export class productController implements IProductController {
         successResponse(
             res,
             "Produk berhasil dihapus",
-            deleted
+            deleted,
+            null, 
+            200
+        )
+    }
+
+    async getStats (_req: Request, res: Response) {
+        const stats = await this.productService.exec()
+        successResponse(
+            res,
+            "Stastistik product berhasil diambil",
+            stats,
+            null,
+            200
         )
     }
 
