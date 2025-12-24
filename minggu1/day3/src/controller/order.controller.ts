@@ -10,7 +10,6 @@ export interface IOrderController {
   update(req: Request, res: Response): Promise<void>
   remove(req: Request, res: Response): Promise<void>
   checkout(req: Request, res: Response): Promise<void>
-  getStats(req: Request, res: Response): Promise<void>
   findComplex(req: Request, res: Response): Promise<void>
 }
 
@@ -23,7 +22,7 @@ export class OrderController implements IOrderController {
     this.remove = this.remove.bind(this)
     this.checkout = this.checkout.bind(this)
     this.findComplex = this.findComplex.bind(this)
-    this.getStats = this.getStats.bind(this)
+
    }
 
   async list(req: Request, res: Response) {
@@ -53,10 +52,15 @@ export class OrderController implements IOrderController {
     successResponse(res, "Order ditemukan", order)
   }
 
-  async create(req: Request, res: Response) {
-    const order = await this.orderService.create(req.body)
-    successResponse(res, "Order berhasil dibuat", order, null, 201)
-  }
+async create(req: Request, res: Response) {
+  const userId = req.user!.id;
+
+  const order = await this.orderService.createOrders({
+    userId,
+  });
+
+  successResponse(res, "Order berhasil dibuat", order, null, 201);
+}
 
   async update(req: Request, res: Response) {
     const order = await this.orderService.update(req.params.id!, req.body)
@@ -73,17 +77,6 @@ export class OrderController implements IOrderController {
     successResponse(res, "Checkout berhasil", order)
   }
 
-  async getStats(_req: Request, res: Response) {
-  const stats = await this.orderService.execStats();
-
-  successResponse(
-    res,
-    "Statistik order berhasil diambil",
-    stats,
-    null,
-    200
-  );
-}
 
 async findComplex(req: Request, res: Response) {
 

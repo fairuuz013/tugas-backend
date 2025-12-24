@@ -23,11 +23,6 @@ export interface ICategoryRepository {
     maxProductPrice: number
   ): Promise<Category[]>;
 
-  getStats(): Promise<{
-    _count: {
-      id: number;
-    };
-  }>;
 }
 
 export class CategoryRepository implements ICategoryRepository {
@@ -111,13 +106,5 @@ export class CategoryRepository implements ICategoryRepository {
     });
   }
 
-
-  async getStats() {
-    return await this.prisma.category.aggregate({
-      _count: {
-        id: true,
-      },
-    });
-  }
 
 }

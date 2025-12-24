@@ -33,9 +33,7 @@ export interface ICategoryService {
   update(id: string, data: Prisma.CategoryUpdateInput): Promise<Category>;
   delete(id: string): Promise<Category>;
   findComplex(name: string, maxProductPrice: number): Promise<Category[]>;
-  getOverview(): Promise<{
-    totalCategories: number;
-  }>;
+
 
 }
 
@@ -109,17 +107,17 @@ export class CategoryServices implements ICategoryService {
   }
 
   // ROUTE 5 - DELETE (SOFT)
-  async delete(id: string): Promise<Category> {
-    const numId = parseInt(id);
+async delete(id: string): Promise<Category> {
+  const numId = parseInt(id);
 
-    const category = await this.categoryRepo.findById(numId);
+  const category = await this.categoryRepo.findById(numId);
 
-    if (!category || category.deletedAt !== null) {
-      throw new Error("Category tidak ditemukan atau sudah dihapus");
-    }
-
-    return await this.categoryRepo.softDelete(numId);
+  if (!category) {
+    throw new Error("Category tidak ditemukan atau sudah dihapus");
   }
+
+  return await this.categoryRepo.softDelete(numId);
+}
 
   async findComplex(
     name: string,
@@ -136,13 +134,6 @@ export class CategoryServices implements ICategoryService {
     );
   }
 
-  async getOverview() {
-    const stats = await this.categoryRepo.getStats();
-
-    return {
-      totalCategories: stats._count.id,
-    };
-  }
-
+  
 }
 

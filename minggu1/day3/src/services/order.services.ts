@@ -42,7 +42,7 @@ export interface OrderListResponse {
 export interface IOrderService {
   list(params: FindAllParams): Promise<OrderListResponse>;
   getById(id: string): Promise<Orders | null>;
-  create(data: Prisma.OrdersCreateInput): Promise<Orders>;
+  createOrders(data: { userId: number }): Promise<Orders>;
   update(id: string, data: Prisma.OrdersUpdateInput): Promise<Orders>;
   delete(id: string): Promise<Orders>;
   checkout(orderId: string): Promise<Orders>;
@@ -107,9 +107,16 @@ export class OrderServices implements IOrderService {
   }
 
   // ROUTE 4 - CREATE
-  async create(data: Prisma.OrdersCreateInput): Promise<Orders> {
-    return await this.orderRepo.create(data);
-  }
+  async createOrders(data: { userId: number }): Promise<Orders> {
+  return await this.orderRepo.create({
+    user: {
+      connect: { id: data.userId }
+    },
+    total: 0,
+    status: "PENDING",
+  });
+}
+
 
   // ROUTE 5 - UPDATE
   async update(id: string, data: Prisma.OrdersUpdateInput): Promise<Orders> {

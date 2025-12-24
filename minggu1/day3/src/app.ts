@@ -10,6 +10,8 @@ import authRouter from './routes/auth.route'
 import profileRoute from "./routes/profile.route";
 import { errorHandler } from "./middleware/error.handler";
 import { successResponse } from "./utils/response";
+import swaggerSpec from "./utils/swagger";
+import  swaggerUi  from "swagger-ui-express";
 
 
 
@@ -28,8 +30,12 @@ app.use(express.static("public"))
  
 
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 // 1
 
+app.get('/', (_req, res) => {
+  res.redirect('/api-docs');
+});
 
 
 

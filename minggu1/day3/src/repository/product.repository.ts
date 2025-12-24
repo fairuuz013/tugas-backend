@@ -43,8 +43,8 @@ export interface IProductRepository {
 
 export class ProductRepository implements IProductRepository {
     constructor(private prisma: PrismaClient) {
-        
-     }
+
+    }
 
 
     // list

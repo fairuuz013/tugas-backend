@@ -9,7 +9,6 @@ export interface ICategoryController {
   update(req: Request, res: Response): Promise<void>;
   remove(req: Request, res: Response): Promise<void>;
   findComplex(req: Request, res: Response): Promise<void>;
-  getOverview(req: Request, res: Response): Promise<void>;
 }
 
 export class CategoryController implements ICategoryController {
@@ -20,7 +19,6 @@ export class CategoryController implements ICategoryController {
     this.update = this.update.bind(this);
     this.remove = this.remove.bind(this);
     this.findComplex = this.findComplex.bind(this);
-    this.getOverview = this.getOverview.bind(this);
   }
 
   async list(req: Request, res: Response) {
@@ -66,8 +64,5 @@ export class CategoryController implements ICategoryController {
     successResponse(res, "Categories kompleks berhasil diambil", categories);
   }
 
-  async getOverview(_req: Request, res: Response) {
-    const overview = await this.categoryService.getOverview();
-    successResponse(res, "Overview categories berhasil diambil", overview);
-  }
+  
 }
