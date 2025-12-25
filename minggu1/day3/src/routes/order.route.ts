@@ -152,7 +152,7 @@ router.post("/", authenticate, orderController.create)
  *       200:
  *         description: Order berhasil diperbarui
  */
-router.put("/:id", orderController.update)
+router.put("/:id", authenticate, orderController.update)
 
 
 /**
